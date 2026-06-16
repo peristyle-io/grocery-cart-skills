@@ -1,0 +1,18 @@
+{
+  "name": "peristyle-cart-skills",
+  "owner": {
+    "name": "kthedges12"
+  },
+  "metadata": {
+    "description": "Turn a recipe into a ready-to-checkout Kroger grocery cart via the Peristyle Cart API",
+    "version": "1.0.0",
+    "repository": "https://github.com/kthedges12/peristyle-cart-skills"
+  },
+  "plugins": [
+    {
+      "name": "peristyle-cart",
+      "description": "Turn a recipe into a ready-to-checkout Kroger grocery cart. Use when someone says \"add this recipe to my cart\", \"shop these ingredients\", \"build my grocery cart\", or \"add this to my Kroger cart\". Handles store auth (OAuth), matching ingredients to real products at the user's store, confirming picks, and adding them to the cart.",
+      "source": "./"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "skill_name": "peristyle-cart",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to add this recipe to my Kroger cart: https://www.bbcgoodfood.com/recipes/classic-victoria-sandwich-recipe",
+      "expected_output": "Should check Kroger auth status first via GET /v1/kroger/auth/status. If not connected, should provide the Kroger login URL and explain the OAuth flow — user opens it in a browser, signs in, and is shown a one-time API key (pk_...). Should ask the user to confirm they've saved the key before proceeding. Should not attempt ingredient matching until auth is confirmed.",
+      "assertions": [
+        "Checks Kroger auth status before anything else",
+        "If not connected, provides the Kroger login URL",
+        "Explains the one-time API key (pk_...) shown after OAuth",
+        "Asks user to confirm they saved the key before continuing",
+        "Does not attempt to match ingredients before auth is confirmed"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I'm connected to Kroger. Shop the ingredients for a pasta carbonara recipe.",
+      "expected_output": "Should search the recipe index for carbonara using POST /v1/recipes/search or GET /v1/recipes?q=carbonara. Should present matching recipes with titles and source URLs, then confirm which one to shop before proceeding. After the user picks a recipe, calls POST /v1/kroger/match with the recipe_id. Presents each suggested product with name, brand, size, and price. Notes pantry staples the user may already have. Asks user to confirm all picks, swap alternatives, and set quantities before adding anything to the cart.",
+      "assertions": [
+        "Searches recipe index for carbonara",
+        "Presents results and asks user to confirm a recipe before proceeding",
+        "Calls POST /v1/kroger/match with recipe_id after recipe is confirmed",
+        "Shows each suggested product with name, size, and price",
+        "Flags pantry staples (eggs, salt, pepper, etc.) as items user may skip",
+        "Asks user to confirm all picks before adding",
+        "Does not add items without explicit user confirmation"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The ingredient picks look good — add them to my cart for pickup.",
+      "expected_output": "Calls POST /v1/kroger/cart/add with confirmed UPCs, quantity 1 per item (or user-set quantity), modality PICKUP, and the recipe_id for attribution. On success, reports added_count and tells the user to open the Kroger app or kroger.com to review and complete checkout. Surfaces the recipe source_url and creator attribution. Never claims the order was placed or checkout was completed.",
+      "assertions": [
+        "Calls POST /v1/kroger/cart/add with confirmed UPCs and quantities",
+        "Sets modality to PICKUP",
+        "Includes recipe_id for attribution",
+        "Reports added_count from the response",
+        "Directs user to Kroger app or kroger.com to complete checkout",
+        "Surfaces source_url and creator attribution",
+        "Never states that the order was placed or payment was taken"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Build my grocery cart for tonight's dinner — something with chicken.",
+      "expected_output": "Should search the recipe index for chicken recipes, present a short list of results with titles and source URLs, and ask the user to choose one before matching ingredients. Should not jump to matching without a confirmed selection. After the user picks a recipe, follows the standard match → confirm → add flow.",
+      "assertions": [
+        "Searches recipe index for chicken recipes",
+        "Presents recipe options with titles and source URLs",
+        "Asks user to select a specific recipe before proceeding",
+        "Does not match ingredients without a confirmed recipe choice",
+        "After selection, follows the match → confirm → add flow"
+      ],
+      "files": []
+    }
+  ]
+}
