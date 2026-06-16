@@ -18,7 +18,7 @@ then added with one step. Built for Claude Code and any agent that supports the
 Use [npx skills](https://github.com/vercel-labs/skills) to install the skill directly:
 
 ```bash
-npx skills add kthedges12/peristyle-cart-skills
+npx skills add peristyle-io/grocery-cart-skills
 ```
 
 This installs to your `.agents/skills/` directory (and symlinks into
@@ -27,7 +27,7 @@ This installs to your `.agents/skills/` directory (and symlinks into
 ### Option 2: Clone and Copy
 
 ```bash
-git clone https://github.com/kthedges12/peristyle-cart-skills.git
+git clone https://github.com/peristyle-io/grocery-cart-skills.git
 cp -r peristyle-cart-skills/skills/* .agents/skills/
 ```
 
