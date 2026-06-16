@@ -4,12 +4,13 @@
     {
       "id": 1,
       "prompt": "I want to add this recipe to my Kroger cart: https://www.bbcgoodfood.com/recipes/classic-victoria-sandwich-recipe",
-      "expected_output": "Should check Kroger auth status first via GET /v1/kroger/auth/status. If not connected, should provide the Kroger login URL and explain the OAuth flow — user opens it in a browser, signs in, and is shown a one-time API key (pk_...). Should ask the user to confirm they've saved the key before proceeding. Should not attempt ingredient matching until auth is confirmed.",
+      "expected_output": "Should check Kroger auth status first via GET /v1/kroger/auth/status. If not connected, should call connect_kroger() to get a login URL, ask the user to open it and sign in to Kroger, then call finish_kroger_connection() which polls and saves the session automatically. Should not attempt ingredient matching until auth is confirmed. The user never copies, pastes, or reads back any key.",
       "assertions": [
         "Checks Kroger auth status before anything else",
-        "If not connected, provides the Kroger login URL",
-        "Explains the one-time API key (pk_...) shown after OAuth",
-        "Asks user to confirm they saved the key before continuing",
+        "If not connected, calls connect_kroger() and returns a login URL",
+        "Asks the user to open the URL and sign in to Kroger",
+        "Calls finish_kroger_connection() to complete the flow automatically",
+        "Does not ask the user to copy or paste any key or token",
         "Does not attempt to match ingredients before auth is confirmed"
       ],
       "files": []

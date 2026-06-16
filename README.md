@@ -33,8 +33,7 @@ cp -r peristyle-cart-skills/skills/* .agents/skills/
 
 ## Contributing
 
-Found a way to improve the skill? PRs and issues welcome. Run
-`./validate-skills.sh` before submitting to check the `SKILL.md` format.
+Found a way to improve the skill? PRs and issues welcome.
 
 ## License
 

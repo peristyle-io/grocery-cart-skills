@@ -17,14 +17,7 @@ step. You review and check out in the Kroger app or on kroger.com.
 **Hard limit:** the API adds items to your cart but cannot place the order or
 take payment. Checkout always happens in the Kroger app or on kroger.com.
 
----
-
-## What you need before starting
-
-- A **running Peristyle Grocery Cart API** — get the URL from whoever set it up, or
-  run it yourself (see the [README](https://github.com/kthedges12/peristyle-grocery-list)).
-  Default: `http://localhost:8001`. Confirm it's up: `GET /v1/health` → `{"status":"ok"}`.
-- A **Kroger account** — free at kroger.com. You'll connect it below.
+**What you need:** a Kroger account (free at kroger.com). That's it.
 
 ---
 
@@ -44,33 +37,15 @@ Confirm the recipe title with the user before continuing. Get its `recipe_id`.
 ## Step 2 — Connect to Kroger (first time only)
 
 The connect flow is automatic — the user never copies, pastes, or reads back any
-key or code. Their Kroger tokens and a per-user credential are stored server-side
-in the database; the MCP client picks up the session over its own back channel.
-
-**Using the MCP tools (recommended):**
+key or code. Their session is stored server-side and saved locally.
 
 1. Call `connect_kroger()` → returns a `login_url`.
 2. Ask the user to open `login_url`, sign in to Kroger, and approve access.
-3. Call `finish_kroger_connection()` — it waits for the user to finish and saves
-   the session automatically to `~/.config/peristyle-grocery-cart/api-key`. If it returns
-   `"waiting"`, give the user a moment and call it again.
+3. Call `finish_kroger_connection()` — it polls until the user finishes and saves
+   the session automatically to `~/.config/peristyle-grocery-cart/api-key`.
 
-That's it — no key to paste, nothing to read aloud.
-
-**Raw HTTP (if not using MCP):**
-
-```
-POST /v1/kroger/auth/start        → { link_token, login_url }
-  (open login_url in a browser, sign in)
-POST /v1/kroger/auth/poll  { "link_token": "…" }
-  → { "status": "pending" }  while waiting
-  → { "status": "connected", "api_key": "pk_…" }  once done (returned once)
-```
-
-Save the returned `api_key` and send it as `Authorization: Bearer pk_…` on cart
-requests. To check connection state later: `GET /v1/kroger/auth/status` (with the
-key). A direct browser visit to `/v1/kroger/auth/login` without a `link_token`
-still works as a manual fallback and shows the key on the callback page.
+If `finish_kroger_connection()` returns `"waiting"`, give the user a moment and
+call it again.
 
 ---
 
@@ -135,8 +110,7 @@ The Kroger API has no order-confirmation or checkout-status endpoint — there i
 no way to verify whether the user actually completed checkout. Do **not** claim
 the order was placed.
 
-Instead, after adding to cart, invite the user to report back once they've
-reviewed the cart:
+After adding to cart, invite the user to report back:
 
 > "All set — open the Kroger app or kroger.com to review and check out.
 > Once you're done, let me know if you swapped anything or ran into anything
@@ -153,17 +127,14 @@ reviewed the cart:
 Then **save what you learn to Claude memory** so future cart runs use better
 defaults. Good things to record:
 
-- Brand preferences per ingredient category ("prefers Kroger-brand olive oil
-  over premium brands", "always buys Boar's Head deli meat")
+- Brand preferences per ingredient category
 - Size preferences ("buys 16 oz pasta, not 12 oz")
-- Items the user always already has at home ("never needs to buy kosher salt,
-  pantry oils, or garlic")
-- Chronic out-of-stock items at their store ("Kroger near this user rarely
-  stocks fresh dill — suggest dried as default")
+- Items the user always already has at home (pantry staples to skip)
+- Chronic out-of-stock items at their store
 - Substitution patterns ("swaps feta → cotija consistently")
 
-Keep memory entries short and specific. Tag them with the store location if
-relevant. Update existing entries rather than creating duplicates.
+Keep memory entries short and specific. Update existing entries rather than
+creating duplicates.
 
 ---
 
@@ -176,15 +147,14 @@ relevant. Update existing entries rather than creating duplicates.
 | `POST` | `/v1/recipes/search` | optional |
 | `GET` | `/v1/recipes/{id}/ingredients` | optional |
 | `POST` | `/v1/kroger/auth/start` | none |
-| `GET` | `/v1/kroger/auth/login` | none (browser) |
 | `POST` | `/v1/kroger/auth/poll` | none (holds link_token) |
 | `GET` | `/v1/kroger/auth/status` | user API key |
 | `GET` | `/v1/kroger/locations?zip=` | optional |
 | `POST` | `/v1/kroger/match` | optional |
 | `POST` | `/v1/kroger/cart/add` | user API key |
 
-Send the user API key as `Authorization: Bearer pk_…`. MCP users: set
-`PERISTYLE_API_KEY` in their MCP server config.
+Send the user API key as `Authorization: Bearer pk_…`. MCP users: the
+`connect_kroger` / `finish_kroger_connection` flow handles this automatically.
 
 ---
 
