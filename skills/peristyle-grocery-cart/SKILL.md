@@ -1,5 +1,5 @@
 ---
-name: peristyle-cart
+name: peristyle-grocery-cart
 description: >-
   Turn a recipe into a ready-to-checkout Kroger grocery cart. Use when someone
   says "add this recipe to my cart", "shop these ingredients", "build my grocery
@@ -8,7 +8,7 @@ description: >-
   them to the cart. Kroger is the only connected store today.
 ---
 
-# Peristyle Cart
+# Peristyle Grocery Cart
 
 Turn a recipe into a ready-to-checkout **Kroger grocery cart** — ingredients
 matched to real products at your store, confirmed by you, then added with one
@@ -21,7 +21,7 @@ take payment. Checkout always happens in the Kroger app or on kroger.com.
 
 ## What you need before starting
 
-- A **running Peristyle Cart API** — get the URL from whoever set it up, or
+- A **running Peristyle Grocery Cart API** — get the URL from whoever set it up, or
   run it yourself (see the [README](https://github.com/kthedges12/peristyle-grocery-list)).
   Default: `http://localhost:8001`. Confirm it's up: `GET /v1/health` → `{"status":"ok"}`.
 - A **Kroger account** — free at kroger.com. You'll connect it below.
@@ -52,7 +52,7 @@ in the database; the MCP client picks up the session over its own back channel.
 1. Call `connect_kroger()` → returns a `login_url`.
 2. Ask the user to open `login_url`, sign in to Kroger, and approve access.
 3. Call `finish_kroger_connection()` — it waits for the user to finish and saves
-   the session automatically to `~/.config/peristyle-cart/api-key`. If it returns
+   the session automatically to `~/.config/peristyle-grocery-cart/api-key`. If it returns
    `"waiting"`, give the user a moment and call it again.
 
 That's it — no key to paste, nothing to read aloud.

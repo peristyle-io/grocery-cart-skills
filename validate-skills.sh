@@ -11,7 +11,7 @@ ISSUES=0
 WARNINGS=0
 PASSED=0
 
-echo "Validating Peristyle Cart Skills"
+echo "Validating Peristyle Grocery Cart Skills"
 echo "================================="
 echo ""
 

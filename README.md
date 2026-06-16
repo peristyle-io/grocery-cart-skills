@@ -1,4 +1,4 @@
-# Peristyle Cart Skill
+# Peristyle Grocery Cart Skill
 
 An AI agent skill that turns a recipe into a ready-to-checkout **Kroger grocery
 cart** — ingredients matched to real products at your store, confirmed by you,
@@ -6,7 +6,7 @@ then added with one step. Built for Claude Code and any agent that supports the
 [Agent Skills spec](https://agentskills.io). Formatted after
 [marketingskills](https://github.com/coreyhaines31/marketingskills).
 
-This skill talks to the [Peristyle Cart API](https://github.com/kthedges12/peristyle-grocery-list),
+This skill talks to the [Peristyle Grocery Cart API](https://github.com/kthedges12/peristyle-grocery-list),
 which must be running and reachable. The API can add items to a Kroger cart but
 cannot place the order or take payment — checkout always happens in the Kroger
 app or on kroger.com.
@@ -15,7 +15,7 @@ app or on kroger.com.
 
 | Skill | Description |
 |-------|-------------|
-| [peristyle-cart](skills/peristyle-cart/) | Turn a recipe into a ready-to-checkout Kroger grocery cart. Use when someone says "add this recipe to my cart", "shop these ingredients", "build my grocery cart", or "add this to my Kroger cart". |
+| [peristyle-grocery-cart](skills/peristyle-grocery-cart/) | Turn a recipe into a ready-to-checkout Kroger grocery cart. Use when someone says "add this recipe to my cart", "shop these ingredients", "build my grocery cart", or "add this to my Kroger cart". |
 
 ## Installation
 
@@ -34,7 +34,7 @@ This installs to your `.agents/skills/` directory (and symlinks into
 
 ```bash
 /plugin marketplace add kthedges12/peristyle-cart-skills
-/plugin install peristyle-cart
+/plugin install peristyle-grocery-cart
 ```
 
 ### Option 3: Clone and Copy
@@ -46,7 +46,7 @@ cp -r peristyle-cart-skills/skills/* .agents/skills/
 
 ## Requirements
 
-- A **running Peristyle Cart API** — see the
+- A **running Peristyle Grocery Cart API** — see the
   [peristyle-grocery-list README](https://github.com/kthedges12/peristyle-grocery-list).
   Default: `http://localhost:8001`.
 - A **Kroger account** — free at kroger.com.
