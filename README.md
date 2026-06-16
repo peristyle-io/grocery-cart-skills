@@ -6,10 +6,9 @@ then added with one step. Built for Claude Code and any agent that supports the
 [Agent Skills spec](https://agentskills.io). Formatted after
 [marketingskills](https://github.com/coreyhaines31/marketingskills).
 
-This skill talks to the [Peristyle Grocery Cart API](https://github.com/kthedges12/peristyle-grocery-list),
-which must be running and reachable. The API can add items to a Kroger cart but
-cannot place the order or take payment — checkout always happens in the Kroger
-app or on kroger.com.
+> **Note:** The Peristyle Grocery Cart API is not yet publicly available. The
+> skill definitions describe what will be possible once the API launches — none
+> of the cart-building functionality works today.
 
 ## Available Skills
 
@@ -43,13 +42,6 @@ This installs to your `.agents/skills/` directory (and symlinks into
 git clone https://github.com/kthedges12/peristyle-cart-skills.git
 cp -r peristyle-cart-skills/skills/* .agents/skills/
 ```
-
-## Requirements
-
-- A **running Peristyle Grocery Cart API** — see the
-  [peristyle-grocery-list README](https://github.com/kthedges12/peristyle-grocery-list).
-  Default: `http://localhost:8001`.
-- A **Kroger account** — free at kroger.com.
 
 ## Contributing
 
