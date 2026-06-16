@@ -140,6 +140,8 @@ creating duplicates.
 
 ## API reference
 
+Base URL: `https://api.peristyle.io`
+
 | Method | Path | Auth |
 |--------|------|------|
 | `GET` | `/v1/health` | none |
