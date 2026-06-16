@@ -5,7 +5,7 @@ cart** — ingredients matched to real products at your store, confirmed by you,
 then added with one step. Built for Claude Code and any agent that supports the
 [Agent Skills spec](https://agentskills.io).
 
-## Available Skills
+## Available Skill
 
 | Skill                                                    | Description                                                                                                                                                                                         |
 | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
