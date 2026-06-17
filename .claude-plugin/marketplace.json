@@ -5,8 +5,8 @@
   },
   "metadata": {
     "description": "Turn a recipe into a ready-to-checkout Kroger grocery cart via the Peristyle Grocery Cart API",
-    "version": "1.0.0",
-    "repository": "https://github.com/kthedges12/peristyle-cart-skills"
+    "version": "1.0.1",
+    "repository": "https://github.com/peristyle-io/grocery-cart-skills"
   },
   "plugins": [
     {
