@@ -31,6 +31,21 @@ git clone https://github.com/peristyle-io/grocery-cart-skills.git
 cp -r peristyle-cart-skills/skills/* .agents/skills/
 ```
 
+## Recommended: pair with the MCP server
+
+**browsing and searching
+recipes needs no key or setup at all.** For the cart flow, the
+`peristyle-grocery-cart` MCP server handles the entire Kroger OAuth connect and
+stores the session for you (nothing to copy or paste):
+
+```bash
+claude mcp add peristyle-grocery-cart -- peristyle-grocery-cart-mcp
+```
+
+You only connect a Kroger account at the moment you want to add items to a cart.
+See the skill's "How auth works" and "Setting up the MCP server" sections for
+details.
+
 ## Contributing
 
 Found a way to improve the skill? PRs and issues welcome.

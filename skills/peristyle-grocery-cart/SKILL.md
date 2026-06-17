@@ -17,50 +17,87 @@ step. You review and check out in the Kroger app or on kroger.com.
 **Hard limit:** the API adds items to your cart but cannot place the order or
 take payment. Checkout always happens in the Kroger app or on kroger.com.
 
-**What you need:** a Kroger account (free at kroger.com). That's it.
+---
+
+## How auth works (read this first)
+
+There are exactly two tiers — nothing in between:
+
+| What you're doing | Auth needed |
+|-------------------|-------------|
+| **Browsing / searching recipes, reading ingredients** | **None.** Fully public. No key, no setup. |
+| **Anything that touches Kroger** (match a recipe to products, search the catalog, add to cart) | The user connects their **Kroger account once** (OAuth). |
+
+So: discover recipes freely, and only ask the user to connect Kroger at the
+moment they want to actually shop. You never need a pre-provisioned API key to
+get started.
+
+**Two ways to integrate — pick one:**
+
+- **MCP server (recommended).** The `peristyle-grocery-cart` MCP server exposes
+  every step as a tool and handles the entire Kroger OAuth flow + local session
+  storage for you. There is nothing to paste or configure. If it's available,
+  use the tools and ignore the raw HTTP details below. See
+  [Setting up the MCP server](#setting-up-the-mcp-server).
+- **Raw HTTP.** Call `https://api.peristyle.io` directly. Recipe routes need no
+  auth. For the Kroger connect flow, follow [Connecting Kroger over raw
+  HTTP](#connecting-kroger-over-raw-http) exactly — the response shapes matter.
 
 ---
 
-## Step 1 — Find the recipe
+## Step 1 — Find the recipe (no auth)
 
-Search the recipe index by keyword or pick from a list:
+MCP: `search_recipes(query=…)` or `list_recipes()`.
+
+Raw HTTP:
 
 ```
 POST /v1/recipes/search   {"query": "pasta carbonara", "limit": 10}
-GET  /v1/recipes          (browse recent)
+GET  /v1/recipes          (browse newest; ?q= for full-text)
+GET  /v1/recipes/{id}/ingredients
 ```
 
-Confirm the recipe title with the user before continuing. Get its `recipe_id`.
+No `Authorization` header required. Confirm the recipe title with the user and
+keep its `recipe_id`.
 
 ---
 
-## Step 2 — Connect to Kroger (first time only)
+## Step 2 — Connect Kroger (only when the user wants to shop)
 
-The connect flow is automatic — the user never copies, pastes, or reads back any
-key or code. Their session is stored server-side and saved locally.
+Do this the first time the user wants to act on a recipe. Skip it entirely if
+they're just browsing.
+
+**MCP (recommended):**
 
 1. Call `connect_kroger()` → returns a `login_url`.
 2. Ask the user to open `login_url`, sign in to Kroger, and approve access.
-3. Call `finish_kroger_connection()` — it polls until the user finishes and saves
-   the session automatically to `~/.config/peristyle-grocery-cart/api-key`.
+3. Call `finish_kroger_connection()` — it polls until they finish and saves the
+   session automatically to `~/.config/peristyle-grocery-cart/api-key`. Nothing
+   to copy or paste.
+4. If it returns `"waiting"`, give the user a moment and call it again.
 
-If `finish_kroger_connection()` returns `"waiting"`, give the user a moment and
-call it again.
+You can check status anytime with `kroger_auth_status()`.
+
+**Raw HTTP:** see [Connecting Kroger over raw HTTP](#connecting-kroger-over-raw-http).
 
 ---
 
-## Step 3 — Match ingredients to products
+## Step 3 — Match ingredients to products (requires connected account)
 
-```
-POST /v1/kroger/match   {"recipe_id": "<id>"}
-```
+MCP: `match_recipe_to_kroger(recipe_id, location_id?)`.
+
+Raw HTTP: `POST /v1/kroger/match {"recipe_id": "<id>"}` with
+`Authorization: Bearer pk_…`.
 
 Each ingredient comes back with a `suggested` product and `candidates`
 (alternatives). Each product has `description`, `brand`, `size`,
-`price_regular`, `price_promo`, and a `upc`.
+`price_regular`, `price_promo`, and a `upc`. Note items where `matched: false`
+and any `pantry_staple: true` lines (salt, water, oil) the user likely has.
 
-Note items where `matched: false` and any `pantry_staple: true` lines
-(salt, water, oil) the user likely already has.
+Omit `location_id` to use the user's saved default store (set via
+`set_preference`), then the server default. If neither is set, match returns a
+400 asking for a store — find one with `GET /v1/kroger/locations?zip=…`
+(also requires the connected account).
 
 ---
 
@@ -71,17 +108,18 @@ Show each suggestion clearly:
 > For **baby spinach** → *Kroger Baby Spinach, 10 oz — $2.49*
 > Alternatives: [list candidates]
 
-Ask the user to:
-- Confirm each pick or swap to an alternative `upc`
-- Set quantities (default: 1 per ingredient)
-- Drop pantry staples they already have
-- Skip anything that didn't match
+Ask the user to confirm each pick or swap to an alternative `upc`, set
+quantities (default 1), drop pantry staples they have, and skip non-matches.
 
 **Do not add anything the user hasn't explicitly confirmed.**
 
 ---
 
-## Step 5 — Add to cart
+## Step 5 — Add to cart (requires connected account)
+
+MCP: `kroger_add_to_cart(items=[{"upc": "…", "quantity": 1}], modality?, recipe_id?)`.
+
+Raw HTTP:
 
 ```
 POST /v1/kroger/cart/add
@@ -95,10 +133,8 @@ Authorization: Bearer pk_…
 ```
 
 Use `"DELIVERY"` if the user prefers it. Include `recipe_id` so the order is
-attributed to the recipe and creator.
-
-On success, report `added_count` and tell the user to **open the Kroger app or
-kroger.com to review and check out**.
+attributed to the recipe and creator. On success, report `added_count` and tell
+the user to **open the Kroger app or kroger.com to review and check out**.
 
 Always surface the recipe's `source_url` and creator name.
 
@@ -117,24 +153,62 @@ After adding to cart, invite the user to report back:
 > out of stock. I'll save your preferences for next time."
 
 **When the user responds**, ask at most three targeted follow-up questions:
+swaps, out-of-stock items, and quantity changes. Then **save what you learn to
+memory** (MCP: `set_preference`) so future cart runs use better defaults — brand
+preferences, size preferences, pantry staples to skip, chronic out-of-stock
+items, substitution patterns. Keep entries short; update rather than duplicate.
 
-1. **Swaps** — "Did you swap any of the suggested products for a different
-   brand, size, or variety?"
-2. **Out of stock** — "Anything the store didn't have that I should know
-   about?"
-3. **Quantity changes** — "Did you bump any quantities up or down?"
+---
 
-Then **save what you learn to Claude memory** so future cart runs use better
-defaults. Good things to record:
+## Setting up the MCP server
 
-- Brand preferences per ingredient category
-- Size preferences ("buys 16 oz pasta, not 12 oz")
-- Items the user always already has at home (pantry staples to skip)
-- Chronic out-of-stock items at their store
-- Substitution patterns ("swaps feta → cotija consistently")
+The server ships with the Peristyle Grocery Cart package and exposes the
+`peristyle-grocery-cart-mcp` command. Recipe tools work immediately with no
+config; the Kroger tools drive the OAuth flow for you.
 
-Keep memory entries short and specific. Update existing entries rather than
-creating duplicates.
+Register it with Claude Code (one line):
+
+```bash
+claude mcp add peristyle-grocery-cart -- peristyle-grocery-cart-mcp
+```
+
+Or add it to `.mcp.json` directly:
+
+```json
+{
+  "mcpServers": {
+    "peristyle-grocery-cart": {
+      "command": "peristyle-grocery-cart-mcp"
+    }
+  }
+}
+```
+
+Notes:
+- It defaults to `https://api.peristyle.io`. Override with
+  `PERISTYLE_GROCERY_CART_API_BASE_URL` to point at a local server.
+- **No API key is needed in config.** Recipes are public, and the Kroger session
+  is obtained and stored automatically by `connect_kroger` /
+  `finish_kroger_connection`.
+
+---
+
+## Connecting Kroger over raw HTTP
+
+Only needed if you are **not** using the MCP server. The endpoints are open (no
+key) because they exist to mint the user's key.
+
+1. `POST /v1/kroger/auth/start` → returns `{"link_token": "…", "login_url": "…"}`.
+   **One call gives you both** — the `login_url` is the Kroger sign-in URL; the
+   `link_token` is what you poll with. (Older servers may omit `login_url`; if so,
+   `POST /v1/kroger/auth/login {"link_token": "…"}` → `{"authorize_url": "…"}`.)
+2. Send the user to `login_url`. They sign in to Kroger and approve access.
+3. Poll `POST /v1/kroger/auth/poll {"link_token": "…"}` every ~3s. It returns
+   `{"status": "pending"}` until done, then `{"status": "connected", "api_key":
+   "pk_…"}` **once**. Save that `pk_…` and send it as `Authorization: Bearer pk_…`
+   on all Kroger action calls. (`410` means the link expired — start over.)
+
+The key is delivered over this back channel — never shown in the browser.
 
 ---
 
@@ -145,17 +219,20 @@ Base URL: `https://api.peristyle.io`
 | Method | Path | Auth |
 |--------|------|------|
 | `GET` | `/v1/health` | none |
-| `GET` | `/v1/recipes` | optional |
-| `POST` | `/v1/recipes/search` | optional |
-| `GET` | `/v1/recipes/{id}/ingredients` | optional |
-| `POST` | `/v1/kroger/auth/start` | none |
-| `POST` | `/v1/kroger/auth/poll` | none (holds link_token) |
-| `GET` | `/v1/kroger/auth/status` | user API key |
-| `GET` | `/v1/kroger/locations?zip=` | optional |
-| `POST` | `/v1/kroger/match` | optional |
-| `POST` | `/v1/kroger/cart/add` | user API key |
+| `GET` | `/v1/recipes` | **none (public)** |
+| `POST` | `/v1/recipes/search` | **none (public)** |
+| `GET` | `/v1/recipes/{id}` | **none (public)** |
+| `GET` | `/v1/recipes/{id}/ingredients` | **none (public)** |
+| `POST` | `/v1/kroger/auth/start` | none (returns `link_token` + `login_url`) |
+| `POST` | `/v1/kroger/auth/login` | none (legacy; `link_token` → `authorize_url`) |
+| `POST` | `/v1/kroger/auth/poll` | none (holds `link_token`) |
+| `GET` | `/v1/kroger/auth/status` | connected account (`pk_…`) |
+| `GET` | `/v1/kroger/locations?zip=` | connected account (`pk_…`) |
+| `GET` | `/v1/kroger/products?query=` | connected account (`pk_…`) |
+| `POST` | `/v1/kroger/match` | connected account (`pk_…`) |
+| `POST` | `/v1/kroger/cart/add` | connected account (`pk_…`) |
 
-Send the user API key as `Authorization: Bearer pk_…`. MCP users: the
+Send the user key as `Authorization: Bearer pk_…`. MCP users: the
 `connect_kroger` / `finish_kroger_connection` flow handles this automatically.
 
 ---
