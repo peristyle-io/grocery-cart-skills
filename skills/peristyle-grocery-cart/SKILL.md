@@ -167,9 +167,14 @@ Two options — remote (no install) or local (needs the package):
 ### Remote — connect by URL (Claude.ai, Cursor, Zed, any URL-capable client)
 
 The server is hosted at **`https://mcp.peristyle.io/mcp`** (streamable-http).
-No package install needed.
+No package install needed — just point your client at the URL.
 
-Add it in Claude.ai → Settings → Integrations, or in your client's MCP config:
+**Claude.ai**
+1. Go to **Settings → Integrations → Add integration**
+2. Enter `https://mcp.peristyle.io/mcp` and save
+
+**Cursor**
+Add to `.cursor/mcp.json` (or Cursor's MCP settings UI):
 
 ```json
 {
@@ -182,24 +187,26 @@ Add it in Claude.ai → Settings → Integrations, or in your client's MCP confi
 }
 ```
 
-**Session persistence:** After connecting Kroger, `finish_kroger_connection()`
-returns a `pk_…` key in its response. Add it as a header to stay connected
-across sessions:
+**Zed**
+Add to your Zed settings under `context_servers`:
 
 ```json
 {
-  "mcpServers": {
+  "context_servers": {
     "peristyle-grocery-cart": {
-      "type": "http",
-      "url": "https://mcp.peristyle.io/mcp",
-      "headers": { "Authorization": "Bearer pk_…" }
+      "url": "https://mcp.peristyle.io/mcp"
     }
   }
 }
 ```
 
-Without the header the Kroger session lasts only for the current MCP session;
-the `connect_kroger` → `finish_kroger_connection` flow works again on reconnect.
+**Any other MCP client that supports streamable-http**
+Point it at `https://mcp.peristyle.io/mcp` with transport type `http` or `streamable-http`.
+
+**Session persistence:** After connecting Kroger, `finish_kroger_connection()`
+returns a `pk_…` key. Add it as an `Authorization: Bearer` header in your
+client config to stay connected across sessions — otherwise the
+`connect_kroger` → `finish_kroger_connection` flow runs again on each new session.
 
 ### Local — stdio subprocess (Claude Code, any stdio-capable client)
 
