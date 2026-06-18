@@ -162,17 +162,56 @@ items, substitution patterns. Keep entries short; update rather than duplicate.
 
 ## Setting up the MCP server
 
-The server ships with the Peristyle Grocery Cart package and exposes the
-`peristyle-grocery-cart-mcp` command. Recipe tools work immediately with no
-config; the Kroger tools drive the OAuth flow for you.
+Two options — remote (no install) or local (needs the package):
 
-Register it with Claude Code (one line):
+### Remote — connect by URL (Claude.ai, Cursor, Zed, any URL-capable client)
+
+The server is hosted at **`https://mcp.peristyle.io/mcp`** (streamable-http).
+No package install needed.
+
+Add it in Claude.ai → Settings → Integrations, or in your client's MCP config:
+
+```json
+{
+  "mcpServers": {
+    "peristyle-grocery-cart": {
+      "type": "http",
+      "url": "https://mcp.peristyle.io/mcp"
+    }
+  }
+}
+```
+
+**Session persistence:** After connecting Kroger, `finish_kroger_connection()`
+returns a `pk_…` key in its response. Add it as a header to stay connected
+across sessions:
+
+```json
+{
+  "mcpServers": {
+    "peristyle-grocery-cart": {
+      "type": "http",
+      "url": "https://mcp.peristyle.io/mcp",
+      "headers": { "Authorization": "Bearer pk_…" }
+    }
+  }
+}
+```
+
+Without the header the Kroger session lasts only for the current MCP session;
+the `connect_kroger` → `finish_kroger_connection` flow works again on reconnect.
+
+### Local — stdio subprocess (Claude Code, any stdio-capable client)
+
+Requires the package: `pip install peristyle-grocery-cart`
+
+Register with Claude Code (one line):
 
 ```bash
 claude mcp add peristyle-grocery-cart -- peristyle-grocery-cart-mcp
 ```
 
-Or add it to `.mcp.json` directly:
+Or add to `.mcp.json`:
 
 ```json
 {
@@ -184,12 +223,9 @@ Or add it to `.mcp.json` directly:
 }
 ```
 
-Notes:
-- It defaults to `https://api.peristyle.io`. Override with
-  `PERISTYLE_GROCERY_CART_API_BASE_URL` to point at a local server.
-- **No API key is needed in config.** Recipes are public, and the Kroger session
-  is obtained and stored automatically by `connect_kroger` /
-  `finish_kroger_connection`.
+The Kroger session is saved automatically to `~/.config/peristyle-grocery-cart/api-key`
+— no key to copy or paste. Override the API base with
+`PERISTYLE_GROCERY_CART_API_BASE_URL` to point at a local server.
 
 ---
 
