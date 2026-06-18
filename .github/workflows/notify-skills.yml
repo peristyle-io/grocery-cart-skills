@@ -1,0 +1,15 @@
+name: Notify skills.sh
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'skills/**'
+      - 'README.md'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger skills.sh re-index
+        run: npx skills add peristyle-io/grocery-cart-skills --yes --all
