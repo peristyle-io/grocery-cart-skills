@@ -35,10 +35,9 @@ get started.
 **Two ways to integrate — pick one:**
 
 - **MCP server (recommended).** The `peristyle-grocery-cart` MCP server exposes
-  every step as a tool and handles the entire Kroger OAuth flow + local session
-  storage for you. There is nothing to paste or configure. If it's available,
-  use the tools and ignore the raw HTTP details below. See
-  [Setting up the MCP server](#setting-up-the-mcp-server).
+  every step as a tool and handles the entire Kroger OAuth flow + session
+  storage for you. If the tools are available, use them and ignore the raw HTTP
+  details below.
 - **Raw HTTP.** Call `https://api.peristyle.io` directly. Recipe routes need no
   auth. For the Kroger connect flow, follow [Connecting Kroger over raw
   HTTP](#connecting-kroger-over-raw-http) exactly — the response shapes matter.
@@ -157,82 +156,6 @@ swaps, out-of-stock items, and quantity changes. Then **save what you learn to
 memory** (MCP: `set_preference`) so future cart runs use better defaults — brand
 preferences, size preferences, pantry staples to skip, chronic out-of-stock
 items, substitution patterns. Keep entries short; update rather than duplicate.
-
----
-
-## Setting up the MCP server
-
-Two options — remote (no install) or local (needs the package):
-
-### Remote — connect by URL (Claude.ai, Cursor, Zed, any URL-capable client)
-
-The server is hosted at **`https://mcp.peristyle.io/mcp`** (streamable-http).
-No package install needed — just point your client at the URL.
-
-**Claude.ai**
-1. Go to **Settings → Integrations → Add integration**
-2. Enter `https://mcp.peristyle.io/mcp` and save
-
-**Cursor**
-Add to `.cursor/mcp.json` (or Cursor's MCP settings UI):
-
-```json
-{
-  "mcpServers": {
-    "peristyle-grocery-cart": {
-      "type": "http",
-      "url": "https://mcp.peristyle.io/mcp"
-    }
-  }
-}
-```
-
-**Zed**
-Add to your Zed settings under `context_servers`:
-
-```json
-{
-  "context_servers": {
-    "peristyle-grocery-cart": {
-      "url": "https://mcp.peristyle.io/mcp"
-    }
-  }
-}
-```
-
-**Any other MCP client that supports streamable-http**
-Point it at `https://mcp.peristyle.io/mcp` with transport type `http` or `streamable-http`.
-
-**Session persistence:** After connecting Kroger, `finish_kroger_connection()`
-returns a `pk_…` key. Add it as an `Authorization: Bearer` header in your
-client config to stay connected across sessions — otherwise the
-`connect_kroger` → `finish_kroger_connection` flow runs again on each new session.
-
-### Local — stdio subprocess (Claude Code, any stdio-capable client)
-
-Requires the package: `pip install peristyle-grocery-cart`
-
-Register with Claude Code (one line):
-
-```bash
-claude mcp add peristyle-grocery-cart -- peristyle-grocery-cart-mcp
-```
-
-Or add to `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "peristyle-grocery-cart": {
-      "command": "peristyle-grocery-cart-mcp"
-    }
-  }
-}
-```
-
-The Kroger session is saved automatically to `~/.config/peristyle-grocery-cart/api-key`
-— no key to copy or paste. Override the API base with
-`PERISTYLE_GROCERY_CART_API_BASE_URL` to point at a local server.
 
 ---
 
