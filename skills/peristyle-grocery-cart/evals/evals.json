@@ -4,14 +4,14 @@
     {
       "id": 1,
       "prompt": "I want to add this recipe to my Kroger cart: https://www.bbcgoodfood.com/recipes/classic-victoria-sandwich-recipe",
-      "expected_output": "Should check Kroger auth status first via GET /v1/kroger/auth/status. If not connected, should call connect_kroger() to get a login URL, ask the user to open it and sign in to Kroger, then call finish_kroger_connection() which polls and saves the session automatically. Should not attempt ingredient matching until auth is confirmed. The user never copies, pastes, or reads back any key.",
+      "expected_output": "Recipe shopping runs against the Peristyle recipe library, not the open web, and there is no on-demand import for an external URL. The agent should recognize the link is external, search the library for a matching recipe (e.g. by title 'victoria sandwich'), and report honestly if it isn't indexed rather than pretending to parse the URL. It must not fabricate a recipe_id or invent ingredients. Only once a real library recipe is confirmed and the user wants to shop does it connect Kroger: call connect_kroger() for a login URL, ask the user to sign in, then finish_kroger_connection() which polls and saves the session automatically — the user never copies or pastes any key.",
       "assertions": [
-        "Checks Kroger auth status before anything else",
-        "If not connected, calls connect_kroger() and returns a login URL",
-        "Asks the user to open the URL and sign in to Kroger",
-        "Calls finish_kroger_connection() to complete the flow automatically",
-        "Does not ask the user to copy or paste any key or token",
-        "Does not attempt to match ingredients before auth is confirmed"
+        "Recognizes the URL is external and cannot be imported/parsed on demand",
+        "Searches the Peristyle recipe library for a matching recipe instead",
+        "If no match exists, says so plainly rather than claiming to shop the URL",
+        "Does not fabricate a recipe_id or invent ingredients",
+        "Only initiates Kroger connect once a real recipe is confirmed and the user wants to shop",
+        "If connecting, calls connect_kroger() then finish_kroger_connection() without asking the user to copy or paste any key"
       ],
       "files": []
     },
