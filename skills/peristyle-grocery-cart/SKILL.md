@@ -79,7 +79,12 @@ repeat shop instead of starting cold.
    session automatically. Nothing to copy or paste.
 4. If it returns `"waiting"`, give the user a moment and call it again.
 
-You can check status anytime with `kroger_auth_status()`.
+You can check status anytime with `kroger_auth_status()`. **A past connection
+stays valid across sessions** — trust the `active` field: when it's `true` the
+account is connected and ready, so go straight to shopping. Kroger's short-lived
+access token is refreshed automatically, so a status that merely shows `expired`
+is *not* a reason to reconnect. Only call `connect_kroger()` again when
+`needs_reauth` is `true` (or the user was never connected).
 
 ---
 
@@ -97,6 +102,24 @@ Omit `location_id` to use the user's saved default store (set via
 400 asking for a store — find one with the locations lookup (by ZIP). Store
 lookup needs **no** Kroger connection (it uses app credentials), so you can help
 the user pick a default store *before* they connect their account.
+
+---
+
+### Search for a specific product (not from a recipe)
+
+Recipe matching only returns products it found for that recipe's ingredients, so
+it can miss a particular **brand** or **size** the user wants (e.g. a 1-liter
+olive oil when the match only surfaced a 25.4 fl oz bottle). For that, use
+freeform catalog search:
+
+`kroger_search_products(query, location_id?, limit?)` — keyword search over the
+Kroger catalog at the user's store. Put the size or brand right in the query
+(`"olive oil 1 liter"`, `"Bertolli olive oil 50.7 oz"`) and raise `limit` (up to
+50) to see more size/pack options. Each result has `description`, `brand`,
+`size`, `price`, and a `upc` you can pass to `kroger_add_to_cart` after the user
+confirms. Requires a connected Kroger account; omit `location_id` to use the
+saved default store. Use it to add standalone items, swap a recipe match for a
+different size, or answer "do they carry a bigger one?".
 
 ---
 

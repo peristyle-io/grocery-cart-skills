@@ -111,3 +111,13 @@ confirmation.
 
 Send the user key as `Authorization: Bearer pk_…`. MCP users: the
 `connect_kroger` / `finish_kroger_connection` flow handles this automatically.
+
+`GET /v1/kroger/auth/status` returns `active` (true = ready to shop now;
+the server refreshes the short-lived access token for you) and `needs_reauth`
+(true = the user must reconnect). A bare `expired: true` is normal between
+sessions and is **not** a reason to reconnect — only reconnect on `needs_reauth`.
+
+`GET /v1/kroger/products?query=…&location_id=…&limit=…` is freeform catalog
+search (keyword, up to `limit=50`) for finding a specific brand or size that
+recipe matching didn't surface. Returns products with `upc`, `description`,
+`brand`, `size`, and price.
