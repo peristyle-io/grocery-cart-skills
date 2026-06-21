@@ -11,7 +11,7 @@ Agent skills for turning recipes into a ready-to-checkout Kroger grocery cart. C
 ## Installation
 
 ```bash
-npx skills add peristyle-io/grocery-cart-skills
+npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill peristyle-grocery-cart
 ```
 
 ## MCP Server
