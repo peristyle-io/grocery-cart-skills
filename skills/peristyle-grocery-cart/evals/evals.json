@@ -33,13 +33,14 @@
     {
       "id": 3,
       "prompt": "The ingredient picks look good — add them to my cart for pickup.",
-      "expected_output": "Calls POST /v1/kroger/cart/add with confirmed UPCs, quantity 1 per item (or user-set quantity), modality PICKUP, and the recipe_id for attribution. On success, reports added_count and tells the user to open the Kroger app or kroger.com to review and complete checkout. Surfaces the recipe source_url and creator attribution. Never claims the order was placed or checkout was completed.",
+      "expected_output": "Calls POST /v1/kroger/cart/add with confirmed UPCs, quantity 1 per item (or user-set quantity), modality PICKUP, and the recipe_id for attribution. On success, reports added_count and gives the user the checkout_url from the response as the link to open and complete checkout on Kroger. Surfaces the recipe source_url and creator attribution. Never claims the order was placed or checkout was completed.",
       "assertions": [
         "Calls POST /v1/kroger/cart/add with confirmed UPCs and quantities",
         "Sets modality to PICKUP",
         "Includes recipe_id for attribution",
         "Reports added_count from the response",
-        "Directs user to Kroger app or kroger.com to complete checkout",
+        "Surfaces checkout_url from the response as the checkout link",
+        "Does not substitute a generic kroger.com URL when checkout_url is present",
         "Surfaces source_url and creator attribution",
         "Never states that the order was placed or payment was taken"
       ],

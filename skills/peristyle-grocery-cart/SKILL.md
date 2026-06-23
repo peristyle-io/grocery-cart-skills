@@ -25,8 +25,9 @@ one step.
   `finish_kroger_connection()`. On every MCP transport the `pk_…` key is held by
   the server — the agent never sees, holds, or emits it.
 - **Match → confirm → add.** Every cart write passes an explicit human
-  confirmation gate. The API fills the cart; checkout always happens in the
-  Kroger app or kroger.com — it cannot place the order or take payment.
+  confirmation gate. The API fills the cart; checkout always happens on Kroger —
+  it cannot place the order or take payment. After add, the API returns a
+  `checkout_url` the user opens to review and pay.
 
 **Use the MCP tools whenever they're available.** Only if the MCP server is
 genuinely absent, fall back to raw HTTP — see **[reference/raw-http.md](reference/raw-http.md)**.
@@ -92,9 +93,11 @@ the user hasn't confirmed.**
 
 **6. Add to cart.** `kroger_add_to_cart(items=[{"upc": "…", "quantity": 1}],
 modality?, recipe_id?)`. `modality` defaults to `"PICKUP"` (`"DELIVERY"` if they
-prefer); include `recipe_id` for attribution. Report `added_count` and tell the
-user to **open the Kroger app or kroger.com to review and check out**. Always
-surface `source_url` and creator name.
+prefer); include `recipe_id` for attribution. Report `added_count`, then give the
+user the **`checkout_url`** from the response as a clickable link — that is how
+they open their pre-filled Kroger cart and complete checkout. Do not substitute a
+bare kroger.com URL when `checkout_url` is present. Always surface `source_url`
+and creator name.
 
 **Close the loop.** There's no checkout-status endpoint, so never claim the order
 was placed. Invite the user to report swaps / out-of-stock / quantity changes,

@@ -85,6 +85,21 @@ Authorization: Bearer pk_…
 }
 ```
 
+Response includes `checkout_url` — a Kroger cart link (affiliate-wrapped when the
+server has Sovrn configured). Give the user that URL to open and complete
+checkout; do not replace it with a generic kroger.com link.
+
+```json
+{
+  "status": "added",
+  "store": "kroger",
+  "added_count": 5,
+  "modality": "PICKUP",
+  "checkout_url": "https://…",
+  "note": "Items are in your Kroger cart. Open checkout_url to review…"
+}
+```
+
 The confirm-with-the-user gate (Step 4 in SKILL.md) and all guardrails apply
 identically here — nothing is added to the cart without explicit user
 confirmation.
