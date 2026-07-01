@@ -1,5 +1,5 @@
 ---
-name: peristyle-grocery-cart
+name: grocery-cart
 description: >-
   Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart. Use
   when someone says "add this recipe to my cart", "shop these ingredients", "build
@@ -35,7 +35,7 @@ genuinely absent, fall back to raw HTTP — see
 ## Install
 
 ```bash
-npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill peristyle-grocery-cart
+npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill grocery-cart
 ```
 
 Pair it with the MCP server for cart actions:
@@ -128,8 +128,17 @@ Walmart has **no connect/poll step**. When the user wants Walmart:
 3. `walmart_add_to_cart(…)` → returns `checkout_url` (Add-to-Cart redirect).
 4. User opens the link in a browser, reviews on walmart.com, and checks out.
 
-Optional: `GET /v1/walmart/locations?zip=` for a `store_id` to pass on add
-(pickup context). Save with `set_preference(key="default_walmart_store_id", …)`.
+`walmart_add_to_cart` picks a `store_id` for you if you don't pass one: saved
+`default_walmart_store_id`, else the nearest store to a saved `default_zip`
+(looked up automatically and cached — same `default_zip` key Kroger uses). Ask
+for a ZIP once and save it with `set_preference(key="default_zip", …)` rather
+than looking up `/v1/walmart/locations?zip=` yourself every time. This only sets
+pickup context on the link; Walmart's own catalog search has no per-store
+filter, so it never changes which products get matched — every product also
+carries `stock`, `available_online`, and `offer_type` (`"ONLINE_ONLY"` /
+`"ONLINE_AND_STORE"` / `"STORE_ONLY"`) as catalog-level availability signals,
+not live inventory at any one store. If the user wants pickup, flag an
+`offer_type: "ONLINE_ONLY"` item before adding it — it won't be on a shelf.
 
 Walmart tools appear only when `PERISTYLE_GROCERY_CART_WALMART_ENABLED=true` on
 the MCP server.

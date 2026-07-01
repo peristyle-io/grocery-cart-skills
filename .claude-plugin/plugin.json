@@ -1,6 +1,6 @@
 {
-  "name": "peristyle-grocery-cart",
-  "description": "Turn a recipe into a ready-to-checkout Kroger grocery cart via the Peristyle Grocery Cart API",
+  "name": "grocery-cart",
+  "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart via the Peristyle Grocery Cart API",
   "version": "1.0.5",
   "author": {
     "name": "kthedges12"

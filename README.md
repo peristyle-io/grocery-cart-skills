@@ -6,12 +6,12 @@ Agent skills for turning recipes into a ready-to-checkout grocery cart at **Krog
 
 | Skill | Description |
 |-------|-------------|
-| [peristyle-grocery-cart](skills/peristyle-grocery-cart/) | Match recipe ingredients to store products and build a cart — Kroger (OAuth) or Walmart (Add-to-Cart link). |
+| [grocery-cart](skills/grocery-cart/) | Match recipe ingredients to store products and build a cart — Kroger (OAuth) or Walmart (Add-to-Cart link). |
 
 ## Installation
 
 ```bash
-npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill peristyle-grocery-cart
+npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill grocery-cart
 ```
 
 ## MCP Server

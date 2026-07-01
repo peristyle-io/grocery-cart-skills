@@ -60,7 +60,7 @@ Give the user `checkout_url` from the response when present.
 ## Walmart (no OAuth)
 
 Walmart routes require `WALMART_ENABLED=true` on the server. No user sign-in or
-`pk_…` key is needed unless `READ_API_TOKEN` is configured on the server.
+`pk_…` key is ever needed for any Walmart route.
 
 ### Match → add
 
@@ -120,10 +120,10 @@ GET /v1/walmart/locations?zip=78701
 | `GET` | `/v1/kroger/products?query=` | `pk_…` |
 | `POST` | `/v1/kroger/match` | `pk_…` |
 | `POST` | `/v1/kroger/cart/add` | `pk_…` |
-| `GET` | `/v1/walmart/locations?zip=` | read token if configured |
-| `GET` | `/v1/walmart/products?query=` | read token if configured |
-| `POST` | `/v1/walmart/match` | read token if configured |
-| `POST` | `/v1/walmart/cart/add` | read token if configured |
+| `GET` | `/v1/walmart/locations?zip=` | none |
+| `GET` | `/v1/walmart/products?query=` | none |
+| `POST` | `/v1/walmart/match` | none |
+| `POST` | `/v1/walmart/cart/add` | none |
 
 MCP users: Kroger connect is handled by `connect_kroger` /
 `finish_kroger_connection`. Walmart needs no connect step.
