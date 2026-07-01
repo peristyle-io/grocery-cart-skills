@@ -1,5 +1,5 @@
 {
-  "skill_name": "peristyle-grocery-cart",
+  "skill_name": "grocery-cart",
   "evals": [
     {
       "id": 1,
@@ -55,6 +55,21 @@
         "Asks user to select a specific recipe before proceeding",
         "Does not match ingredients without a confirmed recipe choice",
         "After selection, follows the match → confirm → add flow"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Shop this pasta carbonara recipe at Walmart — no Kroger.",
+      "expected_output": "Should search the recipe index, confirm which carbonara recipe to shop, then call match_recipe_to_walmart (not Kroger connect). Presents suggested products with product_id, name, size, and price. After user confirms, calls walmart_add_to_cart with product_ids and returns checkout_url for the user to open in a browser. Must NOT call connect_kroger or connect_walmart.",
+      "assertions": [
+        "Does not call connect_kroger or any OAuth connect flow",
+        "Uses match_recipe_to_walmart after recipe is confirmed",
+        "Shows product_id (not upc) for Walmart picks",
+        "Calls walmart_add_to_cart with confirmed product_ids",
+        "Surfaces checkout_url as the link the user must open",
+        "Reminds user to open the link while signed in to Walmart",
+        "Never states that the order was placed"
       ],
       "files": []
     }
