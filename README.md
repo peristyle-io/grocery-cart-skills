@@ -1,12 +1,12 @@
 # Peristyle Grocery Cart Skills
 
-Agent skills for turning recipes into a ready-to-checkout Kroger grocery cart. Compatible with Claude Code and any agent that supports the [Agent Skills spec](https://agentskills.io).
+Agent skills for turning recipes into a ready-to-checkout grocery cart at **Kroger** or **Walmart**. Compatible with Claude Code and any agent that supports the [Agent Skills spec](https://agentskills.io).
 
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| [peristyle-grocery-cart](skills/peristyle-grocery-cart/) | Turn a recipe into a Kroger grocery cart — match ingredients to products, confirm picks, and add to cart. |
+| [peristyle-grocery-cart](skills/peristyle-grocery-cart/) | Match recipe ingredients to store products and build a cart — Kroger (OAuth) or Walmart (Add-to-Cart link). |
 
 ## Installation
 
@@ -16,7 +16,7 @@ npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill peris
 
 ## MCP Server
 
-Pair the skill with the MCP server for full cart support (Kroger sign-in, product matching, add to cart).
+Pair the skill with the MCP server for full cart support (product matching, add to cart). Kroger requires a one-time OAuth connect; Walmart tools need `PERISTYLE_GROCERY_CART_WALMART_ENABLED=true` on the MCP server and require no user sign-in.
 
 **Claude Code:**
 ```bash
