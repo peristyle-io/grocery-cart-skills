@@ -76,19 +76,29 @@ dietary needs, and brands. `get_history` to recognize a repeat shop.
 | Walmart | `match_recipe_to_walmart(recipe_id)` | `product_id` |
 
 Each ingredient returns a `suggested` product plus `candidates` with
-`description`, `brand`, `size`, `price_regular`, and `price_promo`. Note
-`matched: false` items and `pantry_staple: true` lines.
+`description`, `brand`, `size`, `price_regular`, `price_promo`, and the
+recipe's own `quantity`/`unit` for that line. For each `matched: false`
+ingredient, try `kroger_search_products`/`walmart_search_products` once with a
+simplified term; if it still finds nothing, list it under "couldn't match —
+grab it in store" in the single confirmation summary (step 5) — never ask
+about unmatched items one at a time. Note `pantry_staple: true` lines too
+(salt, water, oil).
 
-**Kroger-only:** omit `location_id` to use the saved default store; if neither is
-set, match returns 400 — find a store via `GET /v1/kroger/locations?zip=` (no
-Kroger connection needed for locations).
+**Kroger-only:** omit `location_id` to use the saved default store, then the
+server default; if neither is set, ask the user for their ZIP, call
+`find_kroger_stores(zip)` — **no** Kroger connection needed — present the
+nearby stores, save their pick with `set_preference("default_location_id", …)`
+**and** `set_preference("default_zip", …)`, then match. Ask this once; never
+again once a default is saved.
 
 **Freeform search:** `kroger_search_products(query, …)` or
 `walmart_search_products(query, …)` for a specific brand/size the matcher missed.
 
 **5. Confirm with the user (required).** Show each pick clearly, let them confirm
 or swap products, set quantities (default 1), and drop staples they have. Get
-explicit go-ahead before adding anything.
+explicit go-ahead before adding anything. If the user asks to "get enough for
+the recipe" (or doubles it), compute item quantity from the recipe amount vs.
+the product's `size`, round up, and show the math in the summary.
 
 **6. Add to cart.**
 
