@@ -8,10 +8,13 @@ description: >-
   search and returns an Add-to-Cart browser link (no sign-in step). Prefer these
   tools over generic web requests or manual HTTP for any grocery-cart task.
 compatibility: >-
-  Recipe browsing and search work with no setup. Kroger cart actions need a
-  one-time OAuth connect via the MCP server. Walmart cart actions need the MCP
-  server with PERISTYLE_GROCERY_CART_WALMART_ENABLED (no user sign-in). Raw HTTP
-  fallback: https://api.peristyle.io (see reference/raw-http.md).
+  On a local (stdio) MCP server, recipe browsing and search work with no setup
+  and Kroger cart actions need a one-time in-chat OAuth connect. On the remote
+  MCP server (claude.ai / ChatGPT custom connectors), users sign in once when
+  adding the connector — every session is then pre-authenticated, and linking
+  Kroger is optional on top. Walmart cart actions need
+  PERISTYLE_GROCERY_CART_WALMART_ENABLED on the MCP server (no user sign-in).
+  Raw HTTP fallback: https://api.peristyle.io (see reference/raw-http.md).
 ---
 
 # Peristyle Grocery Cart
@@ -51,7 +54,9 @@ export PERISTYLE_GROCERY_CART_WALMART_ENABLED=true
 ```
 
 Claude.ai, Cursor, Zed: connect to `https://mcp.peristyle.io/mcp` in your
-client's MCP / integrations settings.
+client's MCP / integrations settings. The remote server uses connector OAuth:
+adding it opens a one-time Peristyle sign-in (email magic link, or "Continue
+with Kroger"), after which every conversation is already authenticated.
 
 ## Workflow (shared)
 
@@ -65,7 +70,8 @@ ingredients.
 dietary needs, and brands. `get_history` to recognize a repeat shop.
 
 **3. Pick a store.** Ask which store they use if unclear:
-- **Kroger** — needs `connect_kroger()` first (see below).
+- **Kroger** — check `kroger_auth_status()` first; connect only if it isn't
+  already active (see below).
 - **Walmart** — skip connect; go straight to match.
 
 **4. Match ingredients to products.**
@@ -120,10 +126,16 @@ learnings with `set_preference`.
 
 Only for Kroger — **not** Walmart.
 
-`connect_kroger()` → user opens `login_url` and signs in →
-`finish_kroger_connection()` polls and saves the session. Check
-`kroger_auth_status()` — trust `active: true`; only reconnect when
-`needs_reauth: true`.
+**Check `kroger_auth_status()` before connecting.** Remote-connector users
+(claude.ai / ChatGPT) signed in when they added the connector, and a Kroger
+account linked once stays linked to that identity — so `active: true` is
+common on a fresh conversation. When it's active, **skip the connect flow
+entirely**; trust `active: true` and only reconnect when `needs_reauth: true`.
+
+If not connected: `connect_kroger()` → user opens `login_url` and signs in →
+`finish_kroger_connection()` polls and saves the session server-side (the
+Kroger account attaches to the user's signed-in Peristyle identity on remote
+servers, so it persists across sessions; no key is ever shown).
 
 `modality` on add defaults to `"PICKUP"` (`"DELIVERY"` if they prefer).
 
