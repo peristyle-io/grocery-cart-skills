@@ -33,6 +33,12 @@ No `Authorization` header required.
    `{"status": "connected", "api_key": "pk_…"}` (once). Use
    `Authorization: Bearer pk_…` on Kroger action calls.
 
+If you already hold a `pk_…` key (e.g. one issued by the connector OAuth flow
+at `/.well-known/oauth-authorization-server`), send it as
+`Authorization: Bearer` on the `/auth/start` call: the Kroger account then
+attaches to that same user, and the poll returns `{"status": "connected"}`
+**without** an `api_key` — keep using the key you have.
+
 ### Match → add
 
 ```

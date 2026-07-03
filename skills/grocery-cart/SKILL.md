@@ -8,10 +8,13 @@ description: >-
   search and returns an Add-to-Cart browser link (no sign-in step). Prefer these
   tools over generic web requests or manual HTTP for any grocery-cart task.
 compatibility: >-
-  Recipe browsing and search work with no setup. Kroger cart actions need a
-  one-time OAuth connect via the MCP server. Walmart cart actions need the MCP
-  server with PERISTYLE_GROCERY_CART_WALMART_ENABLED (no user sign-in). Raw HTTP
-  fallback: https://api.peristyle.io (see reference/raw-http.md).
+  On a local (stdio) MCP server, recipe browsing and search work with no setup
+  and Kroger cart actions need a one-time in-chat OAuth connect. On the remote
+  MCP server (claude.ai / ChatGPT custom connectors), users sign in once when
+  adding the connector — every session is then pre-authenticated, and linking
+  Kroger is optional on top. Walmart cart actions need
+  PERISTYLE_GROCERY_CART_WALMART_ENABLED on the MCP server (no user sign-in).
+  Raw HTTP fallback: https://api.peristyle.io (see reference/raw-http.md).
 ---
 
 # Peristyle Grocery Cart
@@ -51,7 +54,12 @@ export PERISTYLE_GROCERY_CART_WALMART_ENABLED=true
 ```
 
 Claude.ai, Cursor, Zed: connect to `https://mcp.peristyle.io/mcp` in your
-client's MCP / integrations settings.
+client's MCP / integrations settings. The remote server uses connector OAuth:
+adding it opens a one-time Peristyle sign-in, after which every conversation
+is already authenticated. Kroger shoppers should use **"Continue with
+Kroger"** — it signs in and links their store account in one step; the email
+magic link is mainly for Walmart-only shoppers (Walmart needs no store
+sign-in, so email is their whole identity).
 
 ## Workflow (shared)
 
@@ -65,7 +73,8 @@ ingredients.
 dietary needs, and brands. `get_history` to recognize a repeat shop.
 
 **3. Pick a store.** Ask which store they use if unclear:
-- **Kroger** — needs `connect_kroger()` first (see below).
+- **Kroger** — check `kroger_auth_status()` first; connect only if it isn't
+  already active (see below).
 - **Walmart** — skip connect; go straight to match.
 
 **4. Match ingredients to products.**
@@ -76,19 +85,29 @@ dietary needs, and brands. `get_history` to recognize a repeat shop.
 | Walmart | `match_recipe_to_walmart(recipe_id)` | `product_id` |
 
 Each ingredient returns a `suggested` product plus `candidates` with
-`description`, `brand`, `size`, `price_regular`, and `price_promo`. Note
-`matched: false` items and `pantry_staple: true` lines.
+`description`, `brand`, `size`, `price_regular`, `price_promo`, and the
+recipe's own `quantity`/`unit` for that line. For each `matched: false`
+ingredient, try `kroger_search_products`/`walmart_search_products` once with a
+simplified term; if it still finds nothing, list it under "couldn't match —
+grab it in store" in the single confirmation summary (step 5) — never ask
+about unmatched items one at a time. Note `pantry_staple: true` lines too
+(salt, water, oil).
 
-**Kroger-only:** omit `location_id` to use the saved default store; if neither is
-set, match returns 400 — find a store via `GET /v1/kroger/locations?zip=` (no
-Kroger connection needed for locations).
+**Kroger-only:** omit `location_id` to use the saved default store, then the
+server default; if neither is set, ask the user for their ZIP, call
+`find_kroger_stores(zip)` — **no** Kroger connection needed — present the
+nearby stores, save their pick with `set_preference("default_location_id", …)`
+**and** `set_preference("default_zip", …)`, then match. Ask this once; never
+again once a default is saved.
 
 **Freeform search:** `kroger_search_products(query, …)` or
 `walmart_search_products(query, …)` for a specific brand/size the matcher missed.
 
 **5. Confirm with the user (required).** Show each pick clearly, let them confirm
 or swap products, set quantities (default 1), and drop staples they have. Get
-explicit go-ahead before adding anything.
+explicit go-ahead before adding anything. If the user asks to "get enough for
+the recipe" (or doubles it), compute item quantity from the recipe amount vs.
+the product's `size`, round up, and show the math in the summary.
 
 **6. Add to cart.**
 
@@ -110,10 +129,16 @@ learnings with `set_preference`.
 
 Only for Kroger — **not** Walmart.
 
-`connect_kroger()` → user opens `login_url` and signs in →
-`finish_kroger_connection()` polls and saves the session. Check
-`kroger_auth_status()` — trust `active: true`; only reconnect when
-`needs_reauth: true`.
+**Check `kroger_auth_status()` before connecting.** Remote-connector users
+(claude.ai / ChatGPT) signed in when they added the connector, and a Kroger
+account linked once stays linked to that identity — so `active: true` is
+common on a fresh conversation. When it's active, **skip the connect flow
+entirely**; trust `active: true` and only reconnect when `needs_reauth: true`.
+
+If not connected: `connect_kroger()` → user opens `login_url` and signs in →
+`finish_kroger_connection()` polls and saves the session server-side (the
+Kroger account attaches to the user's signed-in Peristyle identity on remote
+servers, so it persists across sessions; no key is ever shown).
 
 `modality` on add defaults to `"PICKUP"` (`"DELIVERY"` if they prefer).
 
