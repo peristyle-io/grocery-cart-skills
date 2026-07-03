@@ -55,8 +55,11 @@ export PERISTYLE_GROCERY_CART_WALMART_ENABLED=true
 
 Claude.ai, Cursor, Zed: connect to `https://mcp.peristyle.io/mcp` in your
 client's MCP / integrations settings. The remote server uses connector OAuth:
-adding it opens a one-time Peristyle sign-in (email magic link, or "Continue
-with Kroger"), after which every conversation is already authenticated.
+adding it opens a one-time Peristyle sign-in, after which every conversation
+is already authenticated. Kroger shoppers should use **"Continue with
+Kroger"** — it signs in and links their store account in one step; the email
+magic link is mainly for Walmart-only shoppers (Walmart needs no store
+sign-in, so email is their whole identity).
 
 ## Workflow (shared)
 
