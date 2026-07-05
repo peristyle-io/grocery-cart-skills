@@ -130,6 +130,23 @@ GET /v1/walmart/locations?zip=78701
 | `GET` | `/v1/walmart/products?query=` | none |
 | `POST` | `/v1/walmart/match` | none |
 | `POST` | `/v1/walmart/cart/add` | none |
+| `POST` | `/v1/pantry/opt-in` | `pk_…` |
+| `GET` | `/v1/pantry` | `pk_…` |
+| `PUT` | `/v1/pantry/items` | `pk_…` |
+| `POST` | `/v1/pantry/feedback` | `pk_…` |
+| `POST` | `/v1/pantry/confirmations/{id}/resolve` | `pk_…` |
 
 MCP users: Kroger connect is handled by `connect_kroger` /
 `finish_kroger_connection`. Walmart needs no connect step.
+
+### Pantry (opt-in)
+
+All pantry routes need a `pk_…` key, and every route except `opt-in` requires
+the user to have opted in first (403 otherwise). `GET /v1/pantry` returns
+items with a decayed `status` (`have` / `probably_out` / `out`), love/hate
+`feedback`, and `pending_confirmations`. `PUT /v1/pantry/items` takes
+`{"items": [{"name": "whole milk", "state": "have"|"out"|"remove", "staple": true?}]}`.
+Cart adds by an opted-in user return a `pantry_confirmation_id`; after the user
+checks out, resolve it with
+`POST /v1/pantry/confirmations/{id}/resolve {"purchased": true, "removed_refs": []}`
+to stock the pantry.

@@ -71,6 +71,11 @@ ingredients.
 
 **2. Reuse what you know.** `get_preferences` for default store, modality,
 dietary needs, and brands. `get_history` to recognize a repeat shop.
+`get_pantry()` for the user's kitchen picture (see **Pantry** below): if it
+returns a `pending_confirmations` entry, resolve it *now* with one light
+question — "Did that last order go through as-is?" → `confirm_purchase(…)` —
+before starting the new cart. If it returns `enabled: false`, offer
+`enable_pantry()` once (it's opt-in); don't re-offer every session.
 
 **3. Pick a store.** Ask which store they use if unclear:
 - **Kroger** — check `kroger_auth_status()` first; connect only if it isn't
@@ -104,7 +109,12 @@ again once a default is saved.
 `walmart_search_products(query, …)` for a specific brand/size the matcher missed.
 
 **5. Confirm with the user (required).** Show each pick clearly, let them confirm
-or swap products, set quantities (default 1), and drop staples they have. Get
+or swap products, set quantities (default 1), and drop staples they have. With
+pantry enabled, pre-mark ingredients whose pantry status is `have` as "you
+should already have this — skip?" (confirm before skipping anything
+`probably_out`), sort `love`d products to the top, and never suggest a `hate`d
+one. When the user swaps or rejects a pick with an opinion ("not that brand"),
+capture it via `record_product_feedback` — silently, no ceremony. Get
 explicit go-ahead before adding anything. If the user asks to "get enough for
 the recipe" (or doubles it), compute item quantity from the recipe amount vs.
 the product's `size`, round up, and show the math in the summary.
@@ -120,8 +130,42 @@ Always give the user the **`checkout_url`** from the response as a clickable lin
 For Walmart, remind them to open it while signed in to Walmart so items land in
 their cart session. Surface `source_url` and creator name.
 
+With pantry enabled, include `description` and `ingredient_name` on each item
+you add — they're what make the purchase confirmation (and the pantry entries
+it creates) readable, e.g.
+`{"upc": "…", "quantity": 1, "description": "Kroger Whole Milk 1 gal", "ingredient_name": "whole milk"}`.
+
 **Close the loop.** Never claim the order was placed. Invite feedback and save
-learnings with `set_preference`.
+learnings with `set_preference`. If the add-to-cart response carries a
+`pantry_confirmation_id`, end with one friendly line: after they check out in
+the store's app, they can come back and say "got it all" and their pantry will
+stay current — next time the cart will already know what to skip.
+
+---
+
+## Pantry (opt-in kitchen memory)
+
+The pantry is what makes each shop smarter than the last: what's in the
+kitchen, what the user loves and hates, and whether the last cart was actually
+bought. It is **opt-in** — always ask before `enable_pantry()` and say plainly
+that kitchen inventory and product likes/dislikes will be stored with their
+Peristyle account.
+
+- **Confidence, not counts.** Items are `have` / `probably_out` (shelf life
+  elapsed since last confirmed) / `out`. Never ask for quantities; updates are
+  one tap: `update_pantry(items=[{"name": "eggs", "state": "out"}])`.
+- **The confirmation loop.** Checkout happens in the Kroger/Walmart app, and no
+  store API reports what was bought — the user's word is the only source of
+  truth. Each cart add opens a pending confirmation; resolving it
+  (`confirm_purchase`) is what stocks the pantry. Keep it to **one yes/no
+  question** at the start of the next conversation ("did that order go through
+  as-is?"); only itemize if they say they made changes
+  (`removed_refs=[…]`). Never nag mid-conversation.
+- **Capture in passing.** "We're out of milk", "I grabbed basil at the market",
+  "that salsa was amazing" → `update_pantry` / `record_product_feedback`
+  without breaking the flow of conversation.
+- **Use it, don't recite it.** The pantry's value shows up as better defaults
+  (skipped staples, preferred brands), not as read-backs of the user's data.
 
 ---
 
