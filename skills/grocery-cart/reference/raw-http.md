@@ -48,6 +48,22 @@ Authorization: Bearer pk_…
 {"recipe_id": "<id>"}
 ```
 
+Freeform shopping list (no recipe) — one call for the whole "and also grab…" list:
+
+```
+POST /v1/kroger/match/items
+Authorization: Bearer pk_…
+
+{"items": ["fage 2% greek yogurt 32 oz", "bananas", "18 eggs"]}
+```
+
+Single product by UPC or the trailing digits of a kroger.com product URL:
+
+```
+GET /v1/kroger/products/0068954408302
+Authorization: Bearer pk_…
+```
+
 ```
 POST /v1/kroger/cart/add
 Authorization: Bearer pk_…
@@ -123,8 +139,10 @@ GET /v1/walmart/locations?zip=78701
 | `POST` | `/v1/kroger/auth/poll` | none |
 | `GET` | `/v1/kroger/auth/status` | `pk_…` |
 | `GET` | `/v1/kroger/locations?zip=` | none (app credentials) |
-| `GET` | `/v1/kroger/products?query=` | `pk_…` |
+| `GET` | `/v1/kroger/products?query=&brand=` | `pk_…` |
+| `GET` | `/v1/kroger/products/{upc}` | `pk_…` |
 | `POST` | `/v1/kroger/match` | `pk_…` |
+| `POST` | `/v1/kroger/match/items` | `pk_…` |
 | `POST` | `/v1/kroger/cart/add` | `pk_…` |
 | `GET` | `/v1/walmart/locations?zip=` | none |
 | `GET` | `/v1/walmart/products?query=` | none |

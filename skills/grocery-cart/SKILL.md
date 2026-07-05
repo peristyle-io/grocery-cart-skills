@@ -90,23 +90,36 @@ before starting the new cart. If it returns `enabled: false`, offer
 | Walmart | `match_recipe_to_walmart(recipe_id)` | `product_id` |
 
 Each ingredient returns a `suggested` product plus `candidates` with
-`description`, `brand`, `size`, `price_regular`, `price_promo`, and the
-recipe's own `quantity`/`unit` for that line. For each `matched: false`
-ingredient, try `kroger_search_products`/`walmart_search_products` once with a
-simplified term; if it still finds nothing, list it under "couldn't match —
-grab it in store" in the single confirmation summary (step 5) — never ask
-about unmatched items one at a time. Note `pantry_staple: true` lines too
-(salt, water, oil).
+`description`, `brand`, `size`, `price_regular`, `price_promo`, `stock`, and
+the recipe's own `quantity`/`unit` for that line. Treat `stock: "Not
+available"` as "this store doesn't carry it right now" and pick an
+alternative. For each `matched: false` ingredient, try
+`kroger_search_products`/`walmart_search_products` once with a simplified
+term; if it still finds nothing, list it under "couldn't match — grab it in
+store" in the single confirmation summary (step 5) — never ask about unmatched
+items one at a time. Note `pantry_staple: true` lines too (salt, water, oil).
 
 **Kroger-only:** omit `location_id` to use the saved default store, then the
 server default; if neither is set, ask the user for their ZIP, call
-`find_kroger_stores(zip)` — **no** Kroger connection needed — present the
-nearby stores, save their pick with `set_preference("default_location_id", …)`
-**and** `set_preference("default_zip", …)`, then match. Ask this once; never
-again once a default is saved.
+`find_kroger_stores(zip)` — **no** Kroger connection needed; it saves the ZIP
+as `default_zip` automatically — present the nearby stores and save their pick
+with `set_preference("default_location_id", …)`, then match. Ask this once;
+never again once a default is saved.
+
+**Freeform items (Kroger):** for the "and also grab yogurt, berries, bananas"
+half of a shop, call `match_items_to_kroger(items=[…])` once with the whole
+list — it returns a suggested product plus alternatives per line, same shape
+as the recipe matcher — instead of a `kroger_search_products` round-trip per
+item.
 
 **Freeform search:** `kroger_search_products(query, …)` or
-`walmart_search_products(query, …)` for a specific brand/size the matcher missed.
+`walmart_search_products(query, …)` for a specific brand/size the matcher
+missed. On Kroger, pass `brand="Fage"`-style filters to surface a brand's full
+size range, and answer "anything on sale?" by searching the product category
+("ribeye steak", never "steak sale") and checking `on_sale` /
+`price_promo`. If the user pastes a kroger.com product URL or UPC ("I see it
+right here"), call `kroger_get_product(upc_or_url)` — it's the authoritative
+lookup; never conclude a product doesn't exist from keyword search alone.
 
 **5. Confirm with the user (required).** Show each pick clearly, let them confirm
 or swap products, set quantities (default 1), and drop staples they have. With
@@ -134,6 +147,13 @@ With pantry enabled, include `description` and `ingredient_name` on each item
 you add — they're what make the purchase confirmation (and the pantry entries
 it creates) readable, e.g.
 `{"upc": "…", "quantity": 1, "description": "Kroger Whole Milk 1 gal", "ingredient_name": "whole milk"}`.
+
+**The Kroger cart is add-only.** The API cannot remove items, change
+quantities, or clip digital coupons — say so up front the moment a user asks
+for a removal, swap, or coupon (they do those in the Kroger app before
+checkout), and never promise a "rebuild" or "cleanup pass" you can't perform.
+Never tell the user something was added until the add-to-cart call returned
+success.
 
 **Close the loop.** Never claim the order was placed. Invite feedback and save
 learnings with `set_preference`. If the add-to-cart response carries a
