@@ -143,10 +143,11 @@ Always give the user the **`checkout_url`** from the response as a clickable lin
 For Walmart, remind them to open it while signed in to Walmart so items land in
 their cart session. Surface `source_url` and creator name.
 
-With pantry enabled, include `description` and `ingredient_name` on each item
-you add — they're what make the purchase confirmation (and the pantry entries
-it creates) readable, e.g.
-`{"upc": "…", "quantity": 1, "description": "Kroger Whole Milk 1 gal", "ingredient_name": "whole milk"}`.
+Always include `price` on each item you add (the store price you showed the
+user — promo price if on sale); it powers order-value analytics. With pantry
+enabled, also include `description` and `ingredient_name` — they're what make
+the purchase confirmation (and the pantry entries it creates) readable, e.g.
+`{"upc": "…", "quantity": 1, "price": 3.49, "description": "Kroger Whole Milk 1 gal", "ingredient_name": "whole milk"}`.
 
 **The Kroger cart is add-only.** The API cannot remove items, change
 quantities, or clip digital coupons — say so up front the moment a user asks
