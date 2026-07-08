@@ -16,7 +16,7 @@ npx skills add https://github.com/peristyle-io/grocery-cart-skills --skill groce
 
 ## MCP Server
 
-Pair the skill with the MCP server for full cart support (product matching, add to cart). Kroger requires a one-time OAuth connect; Walmart tools need `PERISTYLE_GROCERY_CART_WALMART_ENABLED=true` on the MCP server and require no user sign-in.
+Pair the skill with the MCP server for full cart support (product matching, add to cart). Kroger requires a one-time OAuth connect; Walmart tools are always available and require no user sign-in.
 
 **Claude Code:**
 ```bash

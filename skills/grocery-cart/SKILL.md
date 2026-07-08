@@ -12,8 +12,8 @@ compatibility: >-
   and Kroger cart actions need a one-time in-chat OAuth connect. On the remote
   MCP server (claude.ai / ChatGPT custom connectors), users sign in once when
   adding the connector — every session is then pre-authenticated, and linking
-  Kroger is optional on top. Walmart cart actions need
-  PERISTYLE_GROCERY_CART_WALMART_ENABLED on the MCP server (no user sign-in).
+  Kroger is optional on top. Walmart cart actions are always available on the
+  MCP server (no user sign-in).
   Raw HTTP fallback: https://api.peristyle.io (see reference/raw-http.md).
 ---
 
@@ -47,11 +47,7 @@ Pair it with the MCP server for cart actions:
 claude mcp add peristyle-grocery-cart -- peristyle-grocery-cart-mcp
 ```
 
-For Walmart tools, enable them on the MCP server:
-
-```bash
-export PERISTYLE_GROCERY_CART_WALMART_ENABLED=true
-```
+Kroger and Walmart tools are both available out of the box.
 
 Claude.ai, Cursor, Zed: connect to `https://mcp.peristyle.io/mcp` in your
 client's MCP / integrations settings. The remote server uses connector OAuth:
@@ -230,8 +226,7 @@ carries `stock`, `available_online`, and `offer_type` (`"ONLINE_ONLY"` /
 not live inventory at any one store. If the user wants pickup, flag an
 `offer_type: "ONLINE_ONLY"` item before adding it — it won't be on a shelf.
 
-Walmart tools appear only when `PERISTYLE_GROCERY_CART_WALMART_ENABLED=true` on
-the MCP server.
+Walmart tools are always available on the MCP server, no user sign-in required.
 
 ---
 
