@@ -117,6 +117,17 @@ Response:
 The user **must open `checkout_url` in a browser** while signed in to Walmart.
 The API does not write to their cart server-side.
 
+Freeform shopping list (no recipe) — one call for the whole "and also grab…" list:
+
+```
+POST /v1/walmart/match/items
+
+{"items": ["fage 2% greek yogurt 32 oz", "bananas", "18 eggs"]}
+```
+
+Same response shape as `/v1/kroger/match/items`: a suggested product plus
+alternatives per line.
+
 ### Catalog search
 
 ```
@@ -147,6 +158,7 @@ GET /v1/walmart/locations?zip=78701
 | `GET` | `/v1/walmart/locations?zip=` | none |
 | `GET` | `/v1/walmart/products?query=` | none |
 | `POST` | `/v1/walmart/match` | none |
+| `POST` | `/v1/walmart/match/items` | none |
 | `POST` | `/v1/walmart/cart/add` | none |
 | `POST` | `/v1/pantry/opt-in` | `pk_…` |
 | `GET` | `/v1/pantry` | `pk_…` |
