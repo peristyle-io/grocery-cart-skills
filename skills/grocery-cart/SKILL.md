@@ -102,11 +102,12 @@ as `default_zip` automatically — present the nearby stores and save their pick
 with `set_preference("default_location_id", …)`, then match. Ask this once;
 never again once a default is saved.
 
-**Freeform items (Kroger):** for the "and also grab yogurt, berries, bananas"
-half of a shop, call `match_items_to_kroger(items=[…])` once with the whole
-list — it returns a suggested product plus alternatives per line, same shape
-as the recipe matcher — instead of a `kroger_search_products` round-trip per
-item.
+**Freeform items:** for the "and also grab yogurt, berries, bananas" half of
+a shop, call `match_items_to_kroger(items=[…])` or `match_items_to_walmart(
+items=[…])` once with the whole list — one call per store; Walmart needs no
+sign-in and takes no location. Each returns a suggested product plus
+alternatives per line, same shape as the recipe matcher — instead of a
+`kroger_search_products`/`walmart_search_products` round-trip per item.
 
 **Freeform search:** `kroger_search_products(query, …)` or
 `walmart_search_products(query, …)` for a specific brand/size the matcher
@@ -156,7 +157,12 @@ success.
 learnings with `set_preference`. If the add-to-cart response carries a
 `pantry_confirmation_id`, end with one friendly line: after they check out in
 the store's app, they can come back and say "got it all" and their pantry will
-stay current — next time the cart will already know what to skip.
+stay current — next time the cart will already know what to skip. On
+widget-rendering hosts, the post-add card itself offers a one-tap "It went
+through as-is" that resolves the confirmation right there — so before asking
+"did that order go through?" in a later conversation, check `get_pantry`'s
+`pending_confirmations` first; if it's empty, the user may have already
+confirmed from the card and there's nothing to ask.
 
 ---
 
