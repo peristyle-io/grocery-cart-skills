@@ -118,16 +118,33 @@ size range, and answer "anything on sale?" by searching the product category
 right here"), call `kroger_get_product(upc_or_url)` — it's the authoritative
 lookup; never conclude a product doesn't exist from keyword search alone.
 
-**5. Confirm with the user (required).** Show each pick clearly, let them confirm
-or swap products, set quantities (default 1), and drop staples they have. With
-pantry enabled, pre-mark ingredients whose pantry status is `have` as "you
-should already have this — skip?" (confirm before skipping anything
-`probably_out`), sort `love`d products to the top, and never suggest a `hate`d
-one. When the user swaps or rejects a pick with an opinion ("not that brand"),
-capture it via `record_product_feedback` — silently, no ceremony. Get
-explicit go-ahead before adding anything. If the user asks to "get enough for
-the recipe" (or doubles it), compute item quantity from the recipe amount vs.
-the product's `size`, round up, and show the math in the summary.
+**5. Confirm with the user (required).** Present the match in three parts, in
+this order:
+
+1. **Pantry check first** — one line on what the pantry lookup found and what
+   it lets you skip ("Checked your pantry — you already have olive oil and
+   garlic, so those are off the list"). If pantry isn't enabled, say plainly
+   that nothing was skipped because there's no pantry to check.
+2. **Ingredient checklist second** — the recipe's full ingredient list with a
+   status mark per line: adding to cart, already have (pantry), pantry
+   staple — skipping, or couldn't match — grab in store. This is the "what's
+   happening to each ingredient" reference; keep it product-free so it can't
+   be mistaken for the cart contents.
+3. **Product picks last** — the matched products (with brand, size, price),
+   immediately before the go-ahead question. Putting the picks last keeps the
+   swappable product view adjacent to the confirmation, so what the user
+   approves is the last thing they saw.
+
+Let them confirm or swap products, set quantities (default 1), and drop
+staples they have. With pantry enabled, pre-mark ingredients whose pantry
+status is `have` as "you should already have this — skip?" (confirm before
+skipping anything `probably_out`), sort `love`d products to the top, and never
+suggest a `hate`d one. When the user swaps or rejects a pick with an opinion
+("not that brand"), capture it via `record_product_feedback` — silently, no
+ceremony. Get explicit go-ahead before adding anything. If the user asks to
+"get enough for the recipe" (or doubles it), compute item quantity from the
+recipe amount vs. the product's `size`, round up, and show the math in the
+summary.
 
 **6. Add to cart.**
 
