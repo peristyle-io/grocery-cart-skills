@@ -130,10 +130,9 @@ this order:
    staple — skipping, or couldn't match — grab in store. This is the "what's
    happening to each ingredient" reference; keep it product-free so it can't
    be mistaken for the cart contents.
-3. **Product picks last** — the matched products (with brand, size, price),
-   immediately before the go-ahead question. Putting the picks last keeps the
-   swappable product view adjacent to the confirmation, so what the user
-   approves is the last thing they saw.
+3. **Product picks last** — discuss the matched products (with brand, size,
+   price) and settle any swaps, immediately before the final list. The match
+   result is working data for this conversation, not the cart.
 
 Let them confirm or swap products, set quantities (default 1), and drop
 staples they have. With pantry enabled, pre-mark ingredients whose pantry
@@ -145,6 +144,14 @@ ceremony. Get explicit go-ahead before adding anything. If the user asks to
 "get enough for the recipe" (or doubles it), compute item quantity from the
 recipe amount vs. the product's `size`, round up, and show the math in the
 summary.
+
+Once the picks are settled, call `review_shopping_list(store, items=[{"label":
+"2 cups cherry tomatoes", "upc": "…", "quantity": 1}], title?, skipped?,
+recipe_id?)` with ONLY what will actually be bought — it re-checks current
+prices/stock and (on widget hosts) renders the final interactive shopping list
+with its add-to-cart button, so the total the user approves equals the cart
+they get. Make it the last thing before the go-ahead question, and don't
+repeat the products in text alongside it.
 
 **6. Add to cart.**
 
