@@ -106,16 +106,27 @@ Response:
 
 ```json
 {
-  "status": "added",
+  "status": "link_created",
   "store": "walmart",
   "added_count": 5,
   "checkout_url": "https://www.walmart.com/sc/cart/addToCart?items=…",
-  "note": "Open the checkout link in your browser while signed in to Walmart…"
+  "note": "Open the checkout link in your browser while signed in to Walmart…",
+  "warnings": [
+    {
+      "product_id": "164053415",
+      "description": "Freshness Guaranteed Chicken Breast",
+      "warning": "sold by weight — the Add-to-Cart link often rejects random-weight items",
+      "url": "https://www.walmart.com/ip/164053415"
+    }
+  ]
 }
 ```
 
 The user **must open `checkout_url` in a browser** while signed in to Walmart.
-The API does not write to their cart server-side.
+The API does not write to their cart server-side, and the link is **not a
+confirmed add** — Walmart silently drops items it can't sell online. Relay
+every entry in `warnings` (store-only / random-weight / unverifiable items)
+so the user double-checks those in their cart.
 
 Freeform shopping list (no recipe) — one call for the whole "and also grab…" list:
 
