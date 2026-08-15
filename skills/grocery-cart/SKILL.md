@@ -95,6 +95,13 @@ term; if it still finds nothing, list it under "couldn't match — grab it in
 store" in the single confirmation summary (step 5) — never ask about unmatched
 items one at a time. Note `pantry_staple: true` lines too (salt, water, oil).
 
+**Walmart-only:** any product carrying `cart_link_warning` (store-only offer,
+random-weight/sold-by-weight, not sold online) may be **silently dropped** by
+Walmart's Add-to-Cart link even though it searches fine. The matcher already
+prefers warning-free picks; when a warned item is the only option, tell the
+user during triage and offer a fixed-size `ONLINE_AND_STORE` alternative or
+"grab it in store" — don't let it ride into the cart link unflagged.
+
 **Kroger-only:** omit `location_id` to use the saved default store, then the
 server default; if neither is set, ask the user for their ZIP, call
 `find_kroger_stores(zip)` — **no** Kroger connection needed; it saves the ZIP
@@ -163,6 +170,16 @@ repeat the products in text alongside it.
 Always give the user the **`checkout_url`** from the response as a clickable link.
 For Walmart, remind them to open it while signed in to Walmart so items land in
 their cart session. Surface `source_url` and creator name.
+
+**Walmart's response is a link, not a confirmed add** (`status:
+"link_created"`). Walmart's cart page silently drops items it can't sell
+online, so never tell the user their items "were added" — say the cart link is
+ready. If the response carries `warnings`, relay every one ("these may not
+make it into your cart — double-check after opening the link"), and give each
+warning's `url` as a clickable link — it's the item's walmart.com page, where
+the user can add it manually in one tap. If the user later reports an item missing from their cart,
+that's this known limitation — re-search for a fixed-size `ONLINE_AND_STORE`
+alternative instead of retrying the same product_id.
 
 Always include `price` on each item you add (the store price you showed the
 user — promo price if on sale); it powers order-value analytics. With pantry
