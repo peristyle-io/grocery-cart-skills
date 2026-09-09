@@ -110,9 +110,31 @@ before starting the new cart. If it returns `enabled: false`, offer
 
 Each ingredient returns a `suggested` product plus `candidates` with
 `description`, `brand`, `size`, `price_regular`, `price_promo`, `stock`, and
-the recipe's own `quantity`/`unit` for that line. Treat `stock: "Not
-available"` as "this store doesn't carry it right now" and pick an
-alternative. For each `matched: false` ingredient, try
+the recipe's own `quantity`/`unit` for that line. The matcher already prefers
+in-stock products and keeps wrong-aisle results (dog food for "filet mignon",
+breath mints for "mint") out of the picks.
+
+**Out of stock.** When nothing sellable matched a line, the server flags it
+`needs_replacement: true` and lists it in the result's `needs_replacement`;
+its `suggested` stays the out-of-stock product (so the user sees what the
+recipe asked for) and `replacement_options` carries up to four **in-stock**
+products, each tagged `replacement_kind`: `same_item` (same ingredient,
+another brand/size), `similar` (the store's nearest offer — sugar snap peas
+for snow peas) or `substitute` (a close cooking swap — butter lettuce for
+little gem). Never add the out-of-stock pick. Offer each flagged line's
+options as a short numbered list — brand, name, size, price, kind — in ONE
+message so the user can answer "1, 3, 2", then carry the chosen ids into the
+final list. Do this in text even on hosts that render tap-to-pick tiles for
+the same options: tiles can fail silently, and a number in chat works the same
+as a tap. A flagged line with no options needs one
+`kroger_search_products`/`walmart_search_products` with different wording, or
+"grab it in store". When a first-choice product was swapped automatically (the
+line carries `substituted_for`, the result lists it in `substituted`) —
+the same product in another size, or another brand's version of an item the
+line never named a brand for; a line that named a brand only ever swaps within
+that brand — mention the swap in one clause.
+
+For each `matched: false` ingredient without options, try
 `kroger_search_products`/`walmart_search_products` once with a simplified
 term; if it still finds nothing, list it under "couldn't match — grab it in
 store" in the single confirmation summary (step 5) — never ask about unmatched
@@ -185,7 +207,11 @@ recipe_id?)` with ONLY what will actually be bought — it re-checks current
 prices/stock and (on widget hosts) renders the final interactive shopping list
 with its add-to-cart button, so the total the user approves equals the cart
 they get. Make it the last thing before the go-ahead question, and don't
-repeat the products in text alongside it.
+repeat the products in text alongside it. If a confirmed pick sold out in the
+meantime the review flags it `needs_replacement` with in-stock
+`replacement_options` (on widget hosts they also render as tap-to-pick
+tiles; always offer them as a numbered list in text too) — re-run the review
+with the chosen id rather than adding the out-of-stock product.
 
 **Exception — nothing to triage.** When `shop_recipe` returns `review: true`
 (pantry not enabled, every line matched, no pantry staples), its `match` is
