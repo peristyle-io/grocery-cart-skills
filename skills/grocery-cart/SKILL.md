@@ -59,11 +59,24 @@ sign-in, so email is their whole identity).
 
 ## Workflow (shared)
 
-**1. Find the recipe (no auth).** `search_recipes(query=…)` or `list_recipes()`;
-keep the `recipe_id`. These search the **Peristyle recipe library**, not the open
-web — there is no on-demand import, so you can't parse a pasted URL or recipe
-text. If there's no close match, say so plainly; never invent a `recipe_id` or
-ingredients.
+**1. Find the recipe (no auth).** For a grocery cart, prefer
+`shop_recipe(recipe=…)` — one call that finds the recipe **and** matches
+every ingredient at the user's store (steps 1, 3 and 4 in one; see below):
+Kroger when the signed-in account has a Kroger link (`match`), otherwise
+Walmart (`walmart_match`).
+Otherwise `search_recipes(query=…)` or `list_recipes()`; keep the `recipe_id`.
+Both take a dish phrase **or the recipe page's URL** — most people arrive from
+a blog post, so when they paste a link, pass it straight through: an indexed
+recipe is resolved directly, and a new one — from **any** recipe site, not
+just Peristyle creators' — is fetched and indexed for a signed-in user (if
+the user isn't signed in yet, get them connected and retry the same URL
+rather than giving up). Otherwise these search the **Peristyle recipe
+library**, not the open web — never parse recipe text yourself. Check `match_kind`:
+`exact`/`url` hits are the answer; `ingredient` hits (and `shop_recipe`'s
+`other_recipe_candidates`) are fuzzy matches on ingredient names because
+nothing matched directly — offer them by title and confirm before shopping
+one. If there's still no close match, say so plainly and ask for the URL or
+different wording; never invent a `recipe_id` or ingredients.
 
 **2. Reuse what you know.** `get_preferences` for default store, modality,
 dietary needs, and brands. `get_history` to recognize a repeat shop.
@@ -77,6 +90,16 @@ before starting the new cart. If it returns `enabled: false`, offer
 - **Kroger** — check `kroger_auth_status()` first; connect only if it isn't
   already active (see below).
 - **Walmart** — skip connect; go straight to match.
+- **Signed in without a Kroger link** (email magic link, or Kroger
+  disconnected): `shop_recipe` matches at Walmart automatically
+  (`walmart_match`) — present those picks and continue with the Walmart
+  tools. Don't ask them to connect Kroger; mention `connect_kroger` only if
+  they ask for Kroger by name.
+- If `shop_recipe` reports Kroger isn't connected (`match_error` 401 — no
+  account on this client at all), it has already matched the recipe at
+  Walmart in the same call (`walmart_match`): present those picks and say in
+  one line that Kroger works too once connected — don't stop at "connect
+  Kroger first".
 
 **4. Match ingredients to products.**
 
@@ -87,9 +110,31 @@ before starting the new cart. If it returns `enabled: false`, offer
 
 Each ingredient returns a `suggested` product plus `candidates` with
 `description`, `brand`, `size`, `price_regular`, `price_promo`, `stock`, and
-the recipe's own `quantity`/`unit` for that line. Treat `stock: "Not
-available"` as "this store doesn't carry it right now" and pick an
-alternative. For each `matched: false` ingredient, try
+the recipe's own `quantity`/`unit` for that line. The matcher already prefers
+in-stock products and keeps wrong-aisle results (dog food for "filet mignon",
+breath mints for "mint") out of the picks.
+
+**Out of stock.** When nothing sellable matched a line, the server flags it
+`needs_replacement: true` and lists it in the result's `needs_replacement`;
+its `suggested` stays the out-of-stock product (so the user sees what the
+recipe asked for) and `replacement_options` carries up to four **in-stock**
+products, each tagged `replacement_kind`: `same_item` (same ingredient,
+another brand/size), `similar` (the store's nearest offer — sugar snap peas
+for snow peas) or `substitute` (a close cooking swap — butter lettuce for
+little gem). Never add the out-of-stock pick. Offer each flagged line's
+options as a short numbered list — brand, name, size, price, kind — in ONE
+message so the user can answer "1, 3, 2", then carry the chosen ids into the
+final list. Do this in text even on hosts that render tap-to-pick tiles for
+the same options: tiles can fail silently, and a number in chat works the same
+as a tap. A flagged line with no options needs one
+`kroger_search_products`/`walmart_search_products` with different wording, or
+"grab it in store". When a first-choice product was swapped automatically (the
+line carries `substituted_for`, the result lists it in `substituted`) —
+the same product in another size, or another brand's version of an item the
+line never named a brand for; a line that named a brand only ever swaps within
+that brand — mention the swap in one clause.
+
+For each `matched: false` ingredient without options, try
 `kroger_search_products`/`walmart_search_products` once with a simplified
 term; if it still finds nothing, list it under "couldn't match — grab it in
 store" in the single confirmation summary (step 5) — never ask about unmatched
@@ -107,7 +152,11 @@ server default; if neither is set, ask the user for their ZIP, call
 `find_kroger_stores(zip)` — **no** Kroger connection needed; it saves the ZIP
 as `default_zip` automatically — present the nearby stores and save their pick
 with `set_preference("default_location_id", …)`, then match. Ask this once;
-never again once a default is saved.
+never again once a default is saved. The nearest store wins by default, even
+a sister banner (Harris Teeter, Fred Meyer); if the user insists on the Kroger
+banner, save `set_preference("default_chain", "Kroger")`. Results carry
+`store_location` (`name`, `address`) — name the store once when you present
+picks ("priced at Kroger - Main St"), never its raw `location_id`.
 
 **Freeform items:** for the "and also grab yogurt, berries, bananas" half of
 a shop, call `match_items_to_kroger(items=[…])` or `match_items_to_walmart(
@@ -158,7 +207,17 @@ recipe_id?)` with ONLY what will actually be bought — it re-checks current
 prices/stock and (on widget hosts) renders the final interactive shopping list
 with its add-to-cart button, so the total the user approves equals the cart
 they get. Make it the last thing before the go-ahead question, and don't
-repeat the products in text alongside it.
+repeat the products in text alongside it. If a confirmed pick sold out in the
+meantime the review flags it `needs_replacement` with in-stock
+`replacement_options` (on widget hosts they also render as tap-to-pick
+tiles; always offer them as a numbered list in text too) — re-run the review
+with the chosen id rather than adding the out-of-stock product.
+
+**Exception — nothing to triage.** When `shop_recipe` returns `review: true`
+(pantry not enabled, every line matched, no pantry staples), its `match` is
+already the final list with fresh prices: do **not** call
+`review_shopping_list`; relay the picks compactly with the total, name the
+store, and ask for the go-ahead right away.
 
 **6. Add to cart.**
 
@@ -196,14 +255,29 @@ success.
 
 **Close the loop.** Never claim the order was placed. Invite feedback and save
 learnings with `set_preference`. If the add-to-cart response carries a
-`pantry_confirmation_id`, end with one friendly line: after they check out in
-the store's app, they can come back and say "got it all" and their pantry will
-stay current — next time the cart will already know what to skip. On
-widget-rendering hosts, the post-add card itself offers a one-tap "It went
-through as-is" that resolves the confirmation right there — so before asking
-"did that order go through?" in a later conversation, check `get_pantry`'s
-`pending_confirmations` first; if it's empty, the user may have already
-confirmed from the card and there's nothing to ask.
+`pantry_confirmation_id`, end with one friendly line that leads with what the
+shopper gets: after they check out in the store's app, a quick "it went
+through" / "didn't" / "I changed a few things" (or a pasted receipt) is how the
+next cart gets smarter for them — it stops re-suggesting what they already
+bought and sticks with products they kept. Don't ask "did it go through?" in
+the same conversation as the add — checkout hasn't happened yet. If they
+volunteer the answer anyway, call `confirm_purchase` right then. The user also
+gets a next-day email with one-tap yes/no links, so before asking in a later
+conversation, check `get_pantry`'s `pending_confirmations` first; if it's
+empty, they already answered (by email or from a revisited card) and there's
+nothing to ask. Confirmations nobody answers expire on their own after two
+weeks.
+
+If the response also carries `pantry_offer: true` (signed in, pantry not
+enabled), fold the offer into that same line rather than adding a second ask —
+the confirmation is what makes the pantry useful, so they belong together:
+"After you check out, tell me whether it went through (or paste the receipt)
+and, if you like, I'll remember what you bought so next time I skip what's
+already in your kitchen and stick with brands you liked. I'd only keep your
+kitchen inventory and product likes/dislikes." Call `enable_pantry()` only if
+they say yes, and don't repeat the offer later in the conversation. If
+`pantry_offer` arrives without a confirmation id, make the same offer on its
+own, once.
 
 ---
 
@@ -246,7 +320,12 @@ entirely**; trust `active: true` and only reconnect when `needs_reauth: true`.
 If not connected: `connect_kroger()` → user opens `login_url` and signs in →
 `finish_kroger_connection()` polls and saves the session server-side (the
 Kroger account attaches to the user's signed-in Peristyle identity on remote
-servers, so it persists across sessions; no key is ever shown).
+servers, so it persists across sessions; no key is ever shown). If it returns
+`store_set: false`, ask for the user's ZIP **in the same reply** that reports
+the connection and save it with `set_preference("default_zip", …)` — the
+nearest store is resolved on the first match, so the first cart doesn't cost
+an extra turn. (The sign-in page also asks for a ZIP; `store_set: true` means
+they gave one.)
 
 `modality` on add defaults to `"PICKUP"` (`"DELIVERY"` if they prefer).
 
