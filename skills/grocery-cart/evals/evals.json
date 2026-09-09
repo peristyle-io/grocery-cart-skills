@@ -4,14 +4,14 @@
     {
       "id": 1,
       "prompt": "I want to add this recipe to my Kroger cart: https://www.bbcgoodfood.com/recipes/classic-victoria-sandwich-recipe",
-      "expected_output": "Recipe shopping runs against the Peristyle recipe library, not the open web, and there is no on-demand import for an external URL. The agent should recognize the link is external, search the library for a matching recipe (e.g. by title 'victoria sandwich'), and report honestly if it isn't indexed rather than pretending to parse the URL. It must not fabricate a recipe_id or invent ingredients. Only once a real library recipe is confirmed and the user wants to shop does it connect Kroger: call connect_kroger() for a login URL, ask the user to sign in, then finish_kroger_connection() which polls and saves the session automatically — the user never copies or pastes any key.",
+      "expected_output": "A pasted recipe URL is passed straight to shop_recipe(recipe=<url>) (or search_recipes(query=<url>)): the server resolves an indexed recipe directly and, for a signed-in user, fetches and indexes a new one. The agent must not parse the page itself or invent ingredients. If the result is match_kind 'url' (or shop_recipe returns the recipe with a match), it proceeds with the normal confirm → add flow. If the URL can't be resolved (no schema.org Recipe data, or not signed in), it says so plainly, offers the fuzzy other_recipe_candidates by title if any, and asks for the dish name — never claims to have parsed the link. Kroger connect only happens once a real recipe is confirmed and the user wants to shop: connect_kroger() for a login URL, then finish_kroger_connection(), which polls and saves the session automatically — the user never copies or pastes any key; if it returns store_set: false, the agent asks for a ZIP in the same reply.",
       "assertions": [
-        "Recognizes the URL is external and cannot be imported/parsed on demand",
-        "Searches the Peristyle recipe library for a matching recipe instead",
-        "If no match exists, says so plainly rather than claiming to shop the URL",
+        "Passes the URL through to shop_recipe or search_recipes instead of parsing the page itself",
         "Does not fabricate a recipe_id or invent ingredients",
+        "If the URL cannot be resolved, says so plainly, offers any fuzzy candidates by title, and asks for the dish name",
         "Only initiates Kroger connect once a real recipe is confirmed and the user wants to shop",
-        "If connecting, calls connect_kroger() then finish_kroger_connection() without asking the user to copy or paste any key"
+        "If connecting, calls connect_kroger() then finish_kroger_connection() without asking the user to copy or paste any key",
+        "If finish_kroger_connection reports store_set: false, asks for the ZIP in the same reply"
       ],
       "files": []
     },
