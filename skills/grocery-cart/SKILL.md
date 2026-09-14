@@ -140,12 +140,13 @@ term; if it still finds nothing, list it under "couldn't match — grab it in
 store" in the single confirmation summary (step 5) — never ask about unmatched
 items one at a time. Note `pantry_staple: true` lines too (salt, water, oil).
 
-**Walmart-only:** any product carrying `cart_link_warning` (store-only offer,
-random-weight/sold-by-weight, not sold online) may be **silently dropped** by
-Walmart's Add-to-Cart link even though it searches fine. The matcher already
-prefers warning-free picks; when a warned item is the only option, tell the
-user during triage and offer a fixed-size `ONLINE_AND_STORE` alternative or
-"grab it in store" — don't let it ride into the cart link unflagged.
+**Walmart-only:** `offer_type: STORE_ONLY` means "not shipped from
+walmart.com", **not** "can't be carted" — store-only and sold-by-weight items
+add fine for pickup or delivery through the cart link. Never describe such an
+item as unavailable or "store-only" to the user. The only thing that blocks an
+add is the item being out of stock at their store, which Walmart tells them
+when the link opens. `offer_type: ONLINE_ONLY` is the one flag worth a heads-up
+for a pickup shopper (it won't be on a shelf).
 
 **Kroger-only:** omit `location_id` to use the saved default store, then the
 server default; if neither is set, ask the user for their ZIP, call
@@ -231,14 +232,14 @@ For Walmart, remind them to open it while signed in to Walmart so items land in
 their cart session. Surface `source_url` and creator name.
 
 **Walmart's response is a link, not a confirmed add** (`status:
-"link_created"`). Walmart's cart page silently drops items it can't sell
-online, so never tell the user their items "were added" — say the cart link is
-ready. If the response carries `warnings`, relay every one ("these may not
-make it into your cart — double-check after opening the link"), and give each
-warning's `url` as a clickable link — it's the item's walmart.com page, where
-the user can add it manually in one tap. If the user later reports an item missing from their cart,
-that's this known limitation — re-search for a fixed-size `ONLINE_AND_STORE`
-alternative instead of retrying the same product_id.
+"link_created"`), so never tell the user their items "were added" — say the
+cart link is ready. Tell them to open it in the Walmart session where their
+pickup or delivery store is already selected: Walmart adds the items for that
+store, checks its stock as the link opens, and shows an "Unable to add to
+Cart" notice naming anything out of stock there, so they should glance at the
+cart before checkout. If the user later reports an item missing, it was out of
+stock at their store — re-search for an alternative rather than retrying the
+same product_id.
 
 Always include `price` on each item you add (the store price you showed the
 user — promo price if on sale); it powers order-value analytics. With pantry

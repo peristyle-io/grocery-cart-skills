@@ -110,23 +110,18 @@ Response:
   "store": "walmart",
   "added_count": 5,
   "checkout_url": "https://www.walmart.com/sc/cart/addToCart?items=…",
-  "note": "Open the checkout link in your browser while signed in to Walmart…",
-  "warnings": [
-    {
-      "product_id": "164053415",
-      "description": "Freshness Guaranteed Chicken Breast",
-      "warning": "sold by weight — the Add-to-Cart link often rejects random-weight items",
-      "url": "https://www.walmart.com/ip/164053415"
-    }
-  ]
+  "note": "Open the cart link in your browser, in the Walmart session where your pickup or delivery store is already selected…",
+  "warnings": []
 }
 ```
 
-The user **must open `checkout_url` in a browser** while signed in to Walmart.
-The API does not write to their cart server-side, and the link is **not a
-confirmed add** — Walmart silently drops items it can't sell online. Relay
-every entry in `warnings` (store-only / random-weight / unverifiable items)
-so the user double-checks those in their cart.
+The user **must open `checkout_url` in a browser**, in the Walmart session
+where their pickup or delivery store is selected. The API does not write to
+their cart server-side, and the link is **not a confirmed add** — Walmart
+checks stock at that store as the link opens and shows the user an "Unable to
+add to Cart" notice naming anything out of stock there. `warnings` is always
+empty (kept for shape stability); store-only and sold-by-weight items add
+fine.
 
 Freeform shopping list (no recipe) — one call for the whole "and also grab…" list:
 
