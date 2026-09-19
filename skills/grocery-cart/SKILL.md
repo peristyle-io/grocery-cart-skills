@@ -197,10 +197,17 @@ status is `have` as "you should already have this — skip?" (confirm before
 skipping anything `probably_out`), sort `love`d products to the top, and never
 suggest a `hate`d one. When the user swaps or rejects a pick with an opinion
 ("not that brand"), capture it via `record_product_feedback` — silently, no
-ceremony. Get explicit go-ahead before adding anything. If the user asks to
-"get enough for the recipe" (or doubles it), compute item quantity from the
-recipe amount vs. the product's `size`, round up, and show the math in the
-summary.
+ceremony. Get explicit go-ahead before adding anything. A recipe match gives
+you both numbers per item: `quantity`/`unit` are what the dish needs ("2 lb")
+and `cart_quantity` is how many packages to add — carry `cart_quantity` into
+the cart, never `quantity`. (On a freeform list from `match_items_to_*`,
+`quantity` IS the package count; that path has no `cart_quantity`.) If the user
+asks to "get enough for the recipe", or for a different number of people, pass
+`servings` to `shop_recipe` / `match_recipe_to_*` — the amounts and
+`cart_quantity` come back already scaled, and the `scaling` block carries the
+math to show plus any lines it couldn't scale. If the recipe doesn't say how
+many it serves, `scaling.action` asks for it: ask the user rather than
+guessing a yield.
 
 Once the picks are settled, call `review_shopping_list(store, items=[{"label":
 "2 cups cherry tomatoes", "upc": "…", "quantity": 1}], title?, skipped?,
