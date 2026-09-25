@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "peristyle-grocery-cart": {
+      "type": "http",
+      "url": "https://mcp.peristyle.io/mcp"
+    }
+  }
+}

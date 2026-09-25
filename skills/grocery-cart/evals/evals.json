@@ -72,6 +72,17 @@
         "Never states that the order was placed"
       ],
       "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "[Context: review_shopping_list rendered the interactive list for 3 Walmart items (limes, cilantro, chicken thighs). The list view then reported: 'Shopping list as the user left it in the walmart list view (NOT in the cart yet): 2x Fresh Limes [product_id 111]; 1x Boneless Chicken Thighs 2 lb [product_id 333]. Left out by the user: cilantro.'] Okay, add these to my cart.",
+      "expected_output": "The agent adds exactly the picks the user left in the list view — 2 limes and the chicken thighs, without the cilantro — via walmart_add_to_cart with product_id 111 quantity 2 and 333 quantity 1, then gives the checkout_url as a link. It does not re-add cilantro or revert to the original quantities from the review result.",
+      "assertions": [
+        "Calls walmart_add_to_cart with product_id 111 at quantity 2 and product_id 333 at quantity 1",
+        "Does not include cilantro",
+        "Gives the checkout_url as a clickable link and reminds the user to open it signed in to Walmart"
+      ],
+      "files": []
     }
   ]
 }
