@@ -49,8 +49,13 @@ claude mcp add peristyle-grocery-cart -- peristyle-grocery-cart-mcp
 
 Kroger and Walmart tools are both available out of the box.
 
-Claude.ai, Cursor, Zed: connect to `https://mcp.peristyle.io/mcp` in your
-client's MCP / integrations settings. The remote server uses connector OAuth:
+Claude (claude.ai, Desktop, Cowork): install the **grocery-cart plugin**
+(`/plugin marketplace add peristyle-io/grocery-cart-skills` in Claude Code, or
+upload it under Customize → Plugins) — it bundles this skill with the remote
+connector. ChatGPT, Cursor, Zed: connect to `https://mcp.peristyle.io/mcp` in
+your client's MCP / integrations / connector settings; the server also serves
+this skill over MCP (`skill://grocery-cart/SKILL.md`), so hosts that import
+skills from a connector (ChatGPT) pick it up without a separate install. The remote server uses connector OAuth:
 adding it opens a one-time Peristyle sign-in, after which every conversation
 is already authenticated. Kroger shoppers should use **"Continue with
 Kroger"** — it signs in and links their store account in one step; the email
@@ -220,6 +225,15 @@ meantime the review flags it `needs_replacement` with in-stock
 `replacement_options` (on widget hosts they also render as tap-to-pick
 tiles; always offer them as a numbered list in text too) — re-run the review
 with the chosen id rather than adding the out-of-stock product.
+
+**Edits made in the interactive list win.** On widget hosts the user can change
+quantities, swap products, or drop lines in the list itself, and the host
+passes their current picks back to you (on Claude and other MCP Apps hosts as
+a "Shopping list as the user left it…" context note; on ChatGPT as the
+widget's state). When the user then says "add these" in chat, add exactly
+those picks, not the ones from the original tool result. If the view reports
+the items were already added from its own button, confirm that instead of
+adding them again.
 
 **Exception — nothing to triage.** When `shop_recipe` returns `review: true`
 (pantry not enabled, every line matched, no pantry staples), its `match` is

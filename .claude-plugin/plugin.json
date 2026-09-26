@@ -1,12 +1,22 @@
 {
   "name": "grocery-cart",
-  "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart via the Peristyle Grocery Cart API",
-  "version": "1.0.8",
+  "displayName": "Peristyle Grocery Cart",
+  "version": "1.1.0",
+  "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart: matches every ingredient to a real product, shows an interactive shopping list, and adds your confirmed picks to the cart.",
   "author": {
-    "name": "kthedges12"
+    "name": "Peristyle",
+    "url": "https://peristyle.io"
   },
   "homepage": "https://github.com/peristyle-io/grocery-cart-skills",
   "repository": "https://github.com/peristyle-io/grocery-cart-skills",
   "license": "MIT",
+  "keywords": [
+    "grocery",
+    "recipes",
+    "kroger",
+    "walmart",
+    "shopping-list",
+    "mcp-apps"
+  ],
   "skills": "./skills"
 }
