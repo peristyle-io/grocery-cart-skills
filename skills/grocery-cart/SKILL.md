@@ -246,7 +246,7 @@ store, and ask for the go-ahead right away.
 | Store | Tool | Checkout |
 |-------|------|----------|
 | Kroger | `kroger_add_to_cart(items=[{"upc": "…", "quantity": 1}], modality?, recipe_id?)` | `checkout_url` if present, else Kroger app/site |
-| Walmart | `walmart_add_to_cart(items=[{"product_id": "…", "quantity": 1}], store_id?, recipe_id?)` | **`checkout_url`** — user opens in browser while signed in to Walmart |
+| Walmart | `walmart_build_cart_link(items=[{"product_id": "…", "quantity": 1}], store_id?, recipe_id?)` | **`checkout_url`** — user opens in browser while signed in to Walmart |
 
 Always give the user the **`checkout_url`** from the response as a clickable link.
 For Walmart, remind them to open it while signed in to Walmart so items land in
@@ -359,10 +359,10 @@ Walmart has **no connect/poll step**. When the user wants Walmart:
 
 1. `match_recipe_to_walmart(recipe_id)` — no sign-in.
 2. Confirm picks (use `product_id`, not `upc`).
-3. `walmart_add_to_cart(…)` → returns `checkout_url` (Add-to-Cart redirect).
+3. `walmart_build_cart_link(…)` → returns `checkout_url` (Add-to-Cart redirect).
 4. User opens the link in a browser, reviews on walmart.com, and checks out.
 
-`walmart_add_to_cart` picks a `store_id` for you if you don't pass one: saved
+`walmart_build_cart_link` picks a `store_id` for you if you don't pass one: saved
 `default_walmart_store_id`, else the nearest store to a saved `default_zip`
 (looked up automatically and cached — same `default_zip` key Kroger uses). Ask
 for a ZIP once and save it with `set_preference(key="default_zip", …)` rather
