@@ -80,8 +80,13 @@ library**, not the open web — never parse recipe text yourself. Check `match_k
 `exact`/`url` hits are the answer; `ingredient` hits (and `shop_recipe`'s
 `other_recipe_candidates`) are fuzzy matches on ingredient names because
 nothing matched directly — offer them by title and confirm before shopping
-one. If there's still no close match, say so plainly and ask for the URL or
-different wording; never invent a `recipe_id` or ingredients.
+one when it's only related. If there's still no close match, **find one
+yourself before asking**: search the web for a well-known recipe page for the
+dish and pass its URL to `shop_recipe` (try another page if one won't
+resolve), then show the picks and name the page used. Only if you can't search
+the web or no page resolves, say so plainly and ask for the URL, or offer to
+shop a standard ingredient list (`match_items_to_walmart` /
+`match_items_to_kroger`). Never invent a `recipe_id`.
 
 **2. Reuse what you know.** `get_preferences` for default store, modality,
 dietary needs, and brands. `get_history` to recognize a repeat shop.
