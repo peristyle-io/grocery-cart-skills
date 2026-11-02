@@ -83,6 +83,21 @@
         "Gives the checkout_url as a clickable link and reminds the user to open it signed in to Walmart"
       ],
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Can you make this? https://www.instagram.com/reel/DGx1aBcDeF/",
+      "expected_output": "A pasted Instagram Reel is treated as a recipe link: the agent calls shop_recipe(recipe=<the reel URL>) first. When the result's action reports a video page, an agent that can open the post reads the caption itself (dish name, creator, ingredient lines) without asking the user, tries shop_recipe(recipe='<dish> <creator>') so a catalog creator gets credit, and otherwise shops the caption's ingredient lines with match_items_to_walmart (or match_items_to_kroger for a connected Kroger account). It names the creator and links the post with the picks. It asks the user to paste the ingredients only if it cannot read the post. It never invents ingredients the caption doesn't list.",
+      "assertions": [
+        "Calls shop_recipe with the Instagram Reel URL before anything else",
+        "On a video-page action, reads the post's caption itself instead of asking the user to paste it (when it can open the post)",
+        "Tries shop_recipe with the dish name and creator before shopping raw caption lines",
+        "Names the creator and links the original post alongside the picks",
+        "Does not invent ingredients that are not in the caption",
+        "Credits the recipe to its creator (the post's author or the person the caption credits), never to Peristyle or a resharing account",
+        "Does not substitute a different creator's catalog recipe for the one in the video"
+      ],
+      "files": []
     }
   ]
 }
