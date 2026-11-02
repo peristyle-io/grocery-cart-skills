@@ -3,7 +3,9 @@ name: grocery-cart
 description: >-
   Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart. Use
   when someone says "add this recipe to my cart", "shop these ingredients", "build
-  my grocery cart", "add this to my Kroger cart", or "shop this at Walmart".
+  my grocery cart", "add this to my Kroger cart", or "shop this at Walmart",
+  or shares a cooking video or recipe post (an Instagram Reel, TikTok, YouTube
+  or Facebook link) and wants to make it or shop it.
   Kroger uses OAuth and server-side cart writes; Walmart uses affiliate catalog
   search and returns an Add-to-Cart browser link (no sign-in step). Prefer these
   tools over generic web requests or manual HTTP for any grocery-cart task.
@@ -76,7 +78,8 @@ recipe is resolved directly, and a new one — from **any** recipe site, not
 just Peristyle creators' — is fetched and indexed for a signed-in user (if
 the user isn't signed in yet, get them connected and retry the same URL
 rather than giving up). Otherwise these search the **Peristyle recipe
-library**, not the open web — never parse recipe text yourself. Check `match_kind`:
+library**, not the open web — never parse recipe text yourself (the one
+exception is a cooking video's caption, below). Check `match_kind`:
 `exact`/`url` hits are the answer; `ingredient` hits (and `shop_recipe`'s
 `other_recipe_candidates`) are fuzzy matches on ingredient names because
 nothing matched directly — offer them by title and confirm before shopping
@@ -87,6 +90,18 @@ resolve), then show the picks and name the page used. Only if you can't search
 the web or no page resolves, say so plainly and ask for the URL, or offer to
 shop a standard ingredient list (`match_items_to_walmart` /
 `match_items_to_kroger`). Never invent a `recipe_id`.
+
+**A cooking video or social post** (Instagram Reel or post, TikTok, YouTube,
+Facebook) is a recipe link too: pass it to `shop_recipe` first — it may already
+be in the library. When it isn't, the result's `action` says so; then, if you
+can open the post yourself (Muse and other assistants with a browser or
+social-post reader usually can), **do the work without asking**: read the
+caption, description or pinned comment for the dish name, the creator and the
+ingredient lines. Try `shop_recipe(recipe="<dish name> <creator name>")` so a
+Peristyle catalog creator gets the credit; if that isn't the same recipe, shop
+the caption's ingredient lines as written (`match_items_to_walmart` /
+`match_items_to_kroger`). Name the creator and link the post with the picks.
+Only if you can't read the post, ask the user to paste the ingredient list.
 
 **2. Reuse what you know.** `get_preferences` for default store, modality,
 dietary needs, and brands. `get_history` to recognize a repeat shop.
