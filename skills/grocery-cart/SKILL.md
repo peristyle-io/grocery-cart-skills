@@ -97,11 +97,18 @@ be in the library. When it isn't, the result's `action` says so; then, if you
 can open the post yourself (Muse and other assistants with a browser or
 social-post reader usually can), **do the work without asking**: read the
 caption, description or pinned comment for the dish name, the creator and the
-ingredient lines. Try `shop_recipe(recipe="<dish name> <creator name>")` so a
-Peristyle catalog creator gets the credit; if that isn't the same recipe, shop
-the caption's ingredient lines as written (`match_items_to_walmart` /
-`match_items_to_kroger`). Name the creator and link the post with the picks.
-Only if you can't read the post, ask the user to paste the ingredient list.
+ingredient lines. Try `shop_recipe(recipe="<dish name> <creator name>")` and
+use a hit only if it's the same dish by the same creator — never swap in another
+creator's recipe. Otherwise shop the caption's ingredient lines as written
+(`match_items_to_walmart` / `match_items_to_kroger`), with quantities from the
+caption or video; if none are given, say the amounts are your estimate. Only if
+you can't read the post, ask the user to paste the ingredient list.
+
+**Credit the creator, never Peristyle.** A recipe belongs to the person who made
+it: the post's author, or whoever the caption credits when an account (Peristyle's
+included) reshares someone else's video. Name them and link the post with the
+picks. Peristyle is only how the ingredients get to the grocery store; never
+describe a recipe as Peristyle's or as "from Peristyle".
 
 **2. Reuse what you know.** `get_preferences` for default store, modality,
 dietary needs, and brands. `get_history` to recognize a repeat shop.

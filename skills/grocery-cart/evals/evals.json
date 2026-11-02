@@ -93,7 +93,9 @@
         "On a video-page action, reads the post's caption itself instead of asking the user to paste it (when it can open the post)",
         "Tries shop_recipe with the dish name and creator before shopping raw caption lines",
         "Names the creator and links the original post alongside the picks",
-        "Does not invent ingredients that are not in the caption"
+        "Does not invent ingredients that are not in the caption",
+        "Credits the recipe to its creator (the post's author or the person the caption credits), never to Peristyle or a resharing account",
+        "Does not substitute a different creator's catalog recipe for the one in the video"
       ],
       "files": []
     }
