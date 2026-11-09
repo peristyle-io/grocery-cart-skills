@@ -396,12 +396,14 @@ those lines come from the creator's own Shopify store, not the grocery store:
    checkout.
 2. In `review_shopping_list`, pass the `recipe_id` — the list picks the shop
    lines up itself. Don't put them in `items` or `skipped`.
-3. When the shopper confirms, call `shopify_checkout(shop=<shop_domain>,
-   items=[{variant_id: suggested.product_id, quantity: cart_quantity}],
-   recipe_id=...)` (a candidate's `product_id` if they chose another flavor).
-   It returns `checkout_url`: the shop's own checkout page, where they enter
-   delivery details and pay. Nothing is bought until they do. Relay the totals,
-   every message, and the policy links as returned.
+3. When the shopper confirms, call `shopify_build_checkouts(items=[{variant_id:
+   suggested.product_id, shop_domain: suggested.shop_domain, shop_name:
+   <shop_name>, quantity: cart_quantity, price, description}], recipe_id=...)`
+   (a candidate's `product_id` if they chose another flavor). It returns the
+   shop's checkout under `checkouts`: its `checkout_url` is the shop's own
+   checkout page, where they enter delivery details and pay. Nothing is bought
+   until they do. Relay the totals, every message, and the policy links as
+   returned.
 4. Cart the grocery lines with the grocery store's own tool as usual. If
    `creator_shop.catalog_unavailable` is set, point the shopper to `shop_url`
    for those lines instead — don't search the grocery store for them.
