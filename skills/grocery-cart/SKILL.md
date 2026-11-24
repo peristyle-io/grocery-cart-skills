@@ -4,7 +4,7 @@ description: >-
   Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart. Use
   when someone says "add this recipe to my cart", "shop these ingredients", "build
   my grocery cart", "add this to my Kroger cart", or "shop this at Walmart".
-  Kroger uses OAuth and server-side cart writes; Walmart uses affiliate catalog
+  Kroger uses OAuth and server-side cart writes; Walmart uses product catalog
   search and returns an Add-to-Cart browser link (no sign-in step). Prefer these
   tools over generic web requests or manual HTTP for any grocery-cart task.
 compatibility: >-
@@ -23,7 +23,7 @@ Turn a recipe into a ready-to-checkout grocery cart — ingredients matched to
 real products, confirmed by the user, then added in one step.
 
 **Connected stores:** **Kroger** (OAuth + server-side cart write) and **Walmart**
-(affiliate catalog + Add-to-Cart browser link, no OAuth). On request, also
+(product catalog + Add-to-Cart browser link, no OAuth). On request, also
 **independent shops on Shopify** (one checkout link per shop, no OAuth).
 
 - **No setup to browse.** Recipe search and reading are fully public.

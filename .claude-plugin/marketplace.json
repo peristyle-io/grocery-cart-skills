@@ -5,12 +5,12 @@
   },
   "metadata": {
     "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart via the Peristyle Grocery Cart API",
-    "version": "1.2.2"
+    "version": "1.2.3"
   },
   "plugins": [
     {
       "name": "grocery-cart",
-      "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart. Use when someone says \"add this recipe to my cart\", \"shop these ingredients\", \"build my grocery cart\", \"add this to my Kroger cart\", or \"shop this at Walmart\". Handles Kroger OAuth and server-side cart writes, or Walmart's no-sign-in affiliate catalog with an Add-to-Cart browser link, matching ingredients to real products, confirming picks, and adding them to the cart.",
+      "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart. Use when someone says \"add this recipe to my cart\", \"shop these ingredients\", \"build my grocery cart\", \"add this to my Kroger cart\", or \"shop this at Walmart\". Handles Kroger OAuth and server-side cart writes, or Walmart's no-sign-in product catalog with an Add-to-Cart browser link, matching ingredients to real products, confirming picks, and adding them to the cart.",
       "source": "./"
     }
   ]
