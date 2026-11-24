@@ -1,7 +1,7 @@
 {
   "name": "grocery-cart",
   "displayName": "Peristyle Grocery Cart",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Turn a recipe into a ready-to-checkout grocery cart at Kroger or Walmart: matches every ingredient to a real product, shows an interactive shopping list, and adds your confirmed picks to the cart.",
   "author": {
     "name": "Peristyle",
@@ -18,5 +18,7 @@
     "shopping-list",
     "mcp-apps"
   ],
-  "skills": "./skills"
+  "skills": "./skills",
+  "icon": ".claude-plugin/icon.png",
+  "privacyPolicyUrl": "https://peristyle.io/privacy"
 }
