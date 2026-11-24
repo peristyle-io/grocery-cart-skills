@@ -1,0 +1,22 @@
+name: Validate plugin
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # --profile directory: also fail where the Claude Directory would refuse
+      # the plugin; --strict: fail on warnings (unknown fields, missing icon).
+      # The directory's safety scan and policy review still run only there.
+      - run: npx -y @anthropic-ai/claude-code@2.1.331 plugin validate --strict --profile directory .
