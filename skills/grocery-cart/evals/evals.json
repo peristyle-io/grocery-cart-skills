@@ -83,6 +83,19 @@
         "Gives the checkout_url as a clickable link and reminds the user to open it signed in to Walmart"
       ],
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Get ground beef from Shopify and eggs from Walmart.",
+      "expected_output": "The agent finds ground beef with shopify_search_products (or match_items_to_shopify) and eggs with match_items_to_walmart, presents the beef with its shop name and product link and the eggs as a Walmart pick, and on confirmation opens the beef checkout with shopify_build_checkouts and the eggs cart link with walmart_build_cart_link. It presents them as two separate purchases with separate links, never one cart or one total, and does not put the beef into review_shopping_list.",
+      "assertions": [
+        "Uses a Shopify tool (shopify_search_products or match_items_to_shopify) for the ground beef",
+        "Uses a Walmart tool for the eggs",
+        "Names the Shopify shop and links the beef to its product_url",
+        "Opens the beef checkout with shopify_build_checkouts and the eggs link with walmart_build_cart_link",
+        "Presents two separate purchases, not one combined cart or total",
+        "Does not pass the Shopify beef to review_shopping_list"
+      ]
     }
   ]
 }
